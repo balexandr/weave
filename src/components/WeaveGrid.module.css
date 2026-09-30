@@ -1,0 +1,157 @@
+/* Outer loom frame, woven cross-hatch, not the stone/arcade look
+   siblings already use, so Weave reads as its own thing at a glance */
+.boardFrame {
+  position: relative;
+  margin-top: 10px;
+  padding: 16px;
+  border-radius: 20px;
+
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(245, 158, 11, 0.05) 0px, rgba(245, 158, 11, 0.05) 3px,
+      transparent 3px, transparent 9px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 3px,
+      transparent 3px, transparent 9px
+    ),
+    linear-gradient(160deg, #2a2013 0%, #1c1608 50%, #120d05 100%);
+
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.16),
+    0 0 0 3px rgba(30, 22, 8, 0.8),
+    0 12px 40px rgba(0, 0, 0, 0.75),
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.gridWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 6 / 5;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #1a1409 0%, #0f0b04 70%, #080502 100%);
+  box-shadow:
+    inset 0 3px 14px rgba(0, 0, 0, 0.6),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.pathSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pathLine {
+  stroke: #f59e0b;
+  stroke-width: 5px;
+  stroke-linecap: round;
+  opacity: 0.85;
+  filter:
+    drop-shadow(0 0 4px #f59e0b)
+    drop-shadow(0 0 12px rgba(245, 158, 11, 0.6));
+}
+
+.pathLineWrong {
+  stroke: #fb7185;
+  filter:
+    drop-shadow(0 0 4px #fb7185)
+    drop-shadow(0 0 12px rgba(251, 113, 133, 0.6));
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-2px); }
+  75%       { transform: translateX(2px); }
+}
+
+.grid {
+  position: absolute;
+  inset: 6px;
+  display: grid;
+  gap: 5px;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  z-index: 1;
+  cursor: default;
+  transition: filter 0.12s, transform 0.08s, border-color 0.15s;
+  background: linear-gradient(160deg, #221a0e 0%, #17110a 100%);
+  border: 1px solid rgba(245, 158, 11, 0.1);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.06),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cell:hover {
+    filter: brightness(1.15);
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+}
+
+.cellCurrent {
+  background: linear-gradient(160deg, #3a2a10 0%, #241a0a 100%);
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow:
+    inset 1px 1px 0 rgba(245, 158, 11, 0.25),
+    0 0 14px rgba(245, 158, 11, 0.3);
+  transform: scale(1.04);
+  z-index: 3;
+}
+
+.cellHinted {
+  border-color: rgba(245, 158, 11, 0.7);
+  animation: hintPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+  50%       { box-shadow: 0 0 16px rgba(245, 158, 11, 0.7); }
+}
+
+.cellFound {
+  --thread-rgb: 245, 158, 11;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--thread) 22%, #17110a) 0%, #14100a 100%);
+  border-color: color-mix(in srgb, var(--thread) 55%, transparent);
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--thread) 20%, transparent),
+    0 0 10px color-mix(in srgb, var(--thread) 35%, transparent);
+}
+
+.cellLetter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(0.9rem, 4vw, 1.3rem);
+  font-weight: 800;
+  color: #d9c9a3;
+  text-transform: uppercase;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.cellCurrent .cellLetter {
+  color: #ffd699;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.7), 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.cellFound .cellLetter {
+  color: var(--thread);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--thread) 50%, transparent), 0 1px 2px rgba(0, 0, 0, 0.8);
+}
