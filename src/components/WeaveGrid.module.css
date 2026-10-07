@@ -101,7 +101,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .cell:hover {
+  .cell:hover:not(.cellFound) {
     filter: brightness(1.15);
     border-color: rgba(245, 158, 11, 0.3);
   }

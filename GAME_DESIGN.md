@@ -458,9 +458,23 @@ duplicates.
 Not yet revisited, flagged once already in the "Fact-check" section
 above (amber sits near 3 other warm suite colors). No further action
 taken since the user hasn't weighed in again; still swappable via
-`--accent`/`--accent-hover` in `src/index.css` plus the `THREAD_COLORS`
-array in `WeaveGrid.jsx` if it turns out to look wrong once seen in a
-real browser.
+`--accent`/`--accent-hover` in `src/index.css` plus `threadColorFor()`
+in `WeaveGrid.jsx` (the hue-spacing function that replaced the old
+fixed `THREAD_COLORS` array, see "Thread-color collision fixed" above)
+if it turns out to look wrong once seen in a real browser.
+
+## Found-cell hover affordance fixed: 2026-10-07
+
+User asked that already-solved letters not be selectable at all.
+Checked the actual code before changing anything: both
+`handlePointerDown` and `handlePointerMove` in `WeaveGrid.jsx` already
+refuse to start or extend a path into a found cell, and have since the
+original build, tap-building routes through the same `handlePointerDown`
+guard, so this was already fully correct functionally. What WAS a real
+gap: `.cell:hover` in `WeaveGrid.module.css` applied to every cell
+including found ones, so hovering a solved letter on desktop still
+brightened it and glowed its border like it was clickable, even though
+clicking did nothing. Scoped the hover rule to `.cell:hover:not(.cellFound)`.
 
 ## Social-share OG image added: 2026-10-07
 
