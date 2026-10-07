@@ -48,7 +48,14 @@ export function useGameState() {
   // different route than the one the generator happened to draw (see
   // matchWord.js), so rendering has to reflect what they really did.
   const [foundWordPaths, setFoundWordPaths] = useState({});
-  const [hintedWords, setHintedWords] = useState(new Set());
+  // How many letters of each word have been revealed via hints so far
+  // (word -> count), not just which words have been hinted at all.
+  // Hints build up ONE word at a time: the second hint continues
+  // revealing the word the first hint already started, rather than
+  // spreading across different words, until that word is found or
+  // fully revealed.
+  const [hintProgress, setHintProgress] = useState({});
+  const [activeHintWord, setActiveHintWord] = useState(null);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [currentPath, setCurrentPath] = useState([]);
   const [wrongFlashToken, setWrongFlashToken] = useState(0);
@@ -66,7 +73,8 @@ export function useGameState() {
     if (saved) {
       setFoundWords(new Set(saved.foundWords));
       setFoundWordPaths(saved.foundWordPaths || {});
-      setHintedWords(new Set(saved.hintedWords || []));
+      setHintProgress(saved.hintProgress || {});
+      setActiveHintWord(saved.activeHintWord || null);
       setHintsUsed(saved.hintsUsed || 0);
       setGameStatus(saved.gameStatus);
       elapsedRef.current = saved.elapsedSeconds || 0;
@@ -106,12 +114,13 @@ export function useGameState() {
       fingerprint,
       foundWords: [...foundWords],
       foundWordPaths,
-      hintedWords: [...hintedWords],
+      hintProgress,
+      activeHintWord,
       hintsUsed,
       gameStatus,
       elapsedSeconds,
     });
-  }, [dateKey, fingerprint, foundWords, foundWordPaths, hintedWords, hintsUsed, gameStatus, elapsedSeconds, initialized]);
+  }, [dateKey, fingerprint, foundWords, foundWordPaths, hintProgress, activeHintWord, hintsUsed, gameStatus, elapsedSeconds, initialized]);
 
   const foundCells = new Set();
   foundWords.forEach((word) => {
@@ -120,9 +129,10 @@ export function useGameState() {
 
   const hintedCells = new Set();
   if (puzzle) {
-    hintedWords.forEach((word) => {
+    Object.entries(hintProgress).forEach(([word, count]) => {
       const path = puzzle.paths[word];
-      if (path) hintedCells.add(cellKey(...path[0]));
+      if (!path) return;
+      path.slice(0, count).forEach(([r, c]) => hintedCells.add(cellKey(r, c)));
     });
   }
 
@@ -138,12 +148,13 @@ export function useGameState() {
     nextFound.add(word);
     setFoundWords(nextFound);
     setFoundWordPaths((prev) => ({ ...prev, [word]: path }));
-    setHintedWords((prev) => {
-      if (!prev.has(word)) return prev;
-      const next = new Set(prev);
-      next.delete(word);
+    setHintProgress((prev) => {
+      if (!(word in prev)) return prev;
+      const next = { ...prev };
+      delete next[word];
       return next;
     });
+    setActiveHintWord((prev) => (prev === word ? null : prev));
     setCurrentPath([]);
     if (nextFound.size === puzzle.words.length) {
       stopTimer();
@@ -176,12 +187,26 @@ export function useGameState() {
 
   const useHint = useCallback(() => {
     if (!puzzle || gameStatus !== 'playing' || hintsUsed >= MAX_HINTS) return;
-    const remaining = puzzle.words.filter((w) => !foundWords.has(w) && !hintedWords.has(w));
-    if (remaining.length === 0) return;
-    const target = [...remaining].sort()[0];
-    setHintedWords((prev) => new Set(prev).add(target));
+
+    // Keep revealing the word already in progress, as long as it's
+    // still unfound and hasn't been fully spelled out already. Only
+    // start a new word once that one's done (found, or every letter
+    // already revealed).
+    const activeStillGoing = activeHintWord
+      && !foundWords.has(activeHintWord)
+      && (hintProgress[activeHintWord] || 0) < activeHintWord.length;
+
+    let target = activeStillGoing ? activeHintWord : null;
+    if (!target) {
+      const remaining = puzzle.words.filter((w) => !foundWords.has(w));
+      if (remaining.length === 0) return;
+      target = [...remaining].sort()[0];
+      setActiveHintWord(target);
+    }
+
+    setHintProgress((prev) => ({ ...prev, [target]: (prev[target] || 0) + 1 }));
     setHintsUsed((n) => n + 1);
-  }, [puzzle, gameStatus, hintsUsed, foundWords, hintedWords]);
+  }, [puzzle, gameStatus, hintsUsed, foundWords, activeHintWord, hintProgress]);
 
   const generateShareText = useCallback(() => {
     if (!puzzle || gameStatus !== 'won') return '';

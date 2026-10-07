@@ -476,6 +476,28 @@ including found ones, so hovering a solved letter on desktop still
 brightened it and glowed its border like it was clickable, even though
 clicking did nothing. Scoped the hover rule to `.cell:hover:not(.cellFound)`.
 
+## Progressive hints, one word at a time: 2026-10-07
+
+User asked that a second hint continue revealing the SAME word the
+first hint started (its next letter), rather than jumping to a
+different word's first letter. Reworked the hint model in
+`useGameState.js`: `hintedWords` (a Set of which words got a hint) is
+now `hintProgress` (a word -> revealed-letter-count map), plus
+`activeHintWord` tracking which word is currently being built up.
+`useHint()` continues the active word (reveals its next letter) as long
+as it's still unfound and not already fully revealed; only picks a
+fresh word once that one's done (found, independently or via hints
+exhausting it). `hintedCells` now lights up every revealed letter of
+the active word, not just its first.
+
+Verified with a standalone simulation against real puzzle data (not
+just reasoning about the code): 3 hints in a row on the same puzzle
+correctly revealed a 4-letter word's first 3 letters one at a time
+(`C` -> `CO` -> `COR`); a separate scenario confirmed that if the
+active word gets found independently (not via hints) between hint
+presses, the next hint correctly starts a new word rather than trying
+to continue one that's already done. `npm run build` passes clean.
+
 ## Social-share OG image added: 2026-10-07
 
 No sibling repo had a committed generator for this (each one's

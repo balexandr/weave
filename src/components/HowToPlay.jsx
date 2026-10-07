@@ -36,7 +36,7 @@ export default function HowToPlay({ onClose }) {
             <span className={styles.stepIcon}>💡</span>
             <div>
               <p className={styles.stepTitle}>Stuck? Use a hint</p>
-              <p className={styles.stepDesc}>3 hints available. Each one lights up the starting letter of an unfound word. Fewer hints used, more stars.</p>
+              <p className={styles.stepDesc}>3 hints available. The first reveals a word's starting letter; each one after that reveals the next letter of that same word. Fewer hints used, more stars.</p>
             </div>
           </div>
         </div>
