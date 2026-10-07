@@ -461,3 +461,20 @@ taken since the user hasn't weighed in again; still swappable via
 `--accent`/`--accent-hover` in `src/index.css` plus the `THREAD_COLORS`
 array in `WeaveGrid.jsx` if it turns out to look wrong once seen in a
 real browser.
+
+## Social-share OG image added: 2026-10-07
+
+No sibling repo had a committed generator for this (each one's
+`og-image.png` was designed directly, no script found in any of them),
+and no image-generation tool was available in this session, so built
+one from scratch: `scripts/generate-og-image.mjs` renders an SVG
+(2400x1260, matching every sibling's size) to PNG with `sharp` (added
+as a devDependency). Layout follows the same template Realm's and
+Mirror's images use: icon + wordmark centered, a two-line tagline below,
+a small `NOODLEGAMES · DAILY WORD PUZZLE` brand label at the bottom.
+The icon is the same two-thread weave mark as `GameLogo.jsx`, scaled up
+as plain SVG paths rather than a font glyph, so it renders identically
+regardless of what fonts are installed on the machine doing the
+rendering. Iterated on centering by actually rendering and viewing the
+PNG (the icon+wordmark row was initially off-center, measured and
+corrected), not just eyeballing the SVG coordinates.
