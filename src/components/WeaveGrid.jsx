@@ -108,21 +108,29 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
     });
   }, [locked, cellFromPoint, foundCells, onPathChange]);
 
+  // Reads currentPath directly (the prop) rather than via a setCurrentPath
+  // functional updater. onSubmit/onTapCheck can themselves call
+  // setCurrentPath (applyFound clears it to [] on a match), and nesting
+  // that inside this updater's own setCurrentPath call meant React could
+  // apply this updater's "return prev unchanged" AFTER the nested clear,
+  // silently reviving the just-completed word's path instead of leaving
+  // it cleared. Confirmed live: finishing CLOSET then starting VINEGAR
+  // showed "CLOSETVINEGAR" in the attempt display, the completed word's
+  // path never actually cleared. Same nested-setState-in-updater hazard
+  // as the ref-based bug Tandem's time bonus hit before (see
+  // project_noodle_games memory); fix is the same, stop relying on
+  // ordering between two state updates to the same piece of state and
+  // just read the already-current prop instead.
   const handlePointerUp = useCallback(() => {
     if (!drawingRef.current) return;
     drawingRef.current = false;
+    if (currentPath.length === 0) return;
     if (movedRef.current) {
-      onPathChange((prev) => {
-        if (prev.length > 0) onSubmit(prev);
-        return prev;
-      });
+      onSubmit(currentPath);
     } else {
-      onPathChange((prev) => {
-        if (prev.length > 0) onTapCheck(prev);
-        return prev;
-      });
+      onTapCheck(currentPath);
     }
-  }, [onPathChange, onSubmit, onTapCheck]);
+  }, [currentPath, onSubmit, onTapCheck]);
 
   useEffect(() => {
     const el = gridRef.current;

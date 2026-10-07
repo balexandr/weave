@@ -498,6 +498,51 @@ active word gets found independently (not via hints) between hint
 presses, the next hint correctly starts a new word rather than trying
 to continue one that's already done. `npm run build` passes clean.
 
+## Real bug: completed word's letters leaked into the next attempt: 2026-10-07
+
+User reported: finished CLOSET, then started tracing VINEGAR, and the
+attempt display showed "CLOSETVINEGAR". CLOSET's path never actually
+cleared.
+
+Root cause, in `WeaveGrid.jsx`'s `handlePointerUp`: it called
+`onSubmit`/`onTapCheck` from INSIDE a `setCurrentPath` functional
+updater (`onPathChange((prev) => { onSubmit(prev); return prev; })`,
+read-prev-as-a-side-channel, same shape the pointerdown/pointermove
+handlers also use). But `onSubmit`/`onTapCheck` can themselves trigger
+`applyFound`, which calls `setCurrentPath([])` directly. That's a
+SECOND, independent dispatch to the same piece of state, fired while
+React was still in the middle of resolving the FIRST one. Nothing
+guarantees the outer updater's `return prev` (the stale, unchanged
+path) gets applied before rather than after the nested clear, so the
+"finished, clear it" turned out to not reliably win, silently reviving
+the just-completed word's path as the apparent start of the next one.
+
+This is the exact nested-setState-in-a-functional-updater hazard
+Tandem's time-bonus bug hit before (a ref read right after a `setState`
+call, assuming eager/synchronous execution that React doesn't
+guarantee). Different mechanism (a ref there, a second `setState` call
+here), same root mistake: relying on ordering between two updates to
+one piece of state instead of just reading state that's already
+current.
+
+Fixed by not going through the updater at all for this read:
+`handlePointerUp` now reads `currentPath` directly (the prop, already
+fresh by the time a genuinely separate pointerup event fires) and calls
+`onSubmit`/`onTapCheck` as plain top-level calls, not nested inside
+another `setCurrentPath` dispatch. Swept the rest of the codebase for
+the same pattern (any functional updater that calls another setter
+inside it): `applyFound` in `useGameState.js` has several, but all of
+them compute and return pure derived values, no nested setState calls,
+and it's now called directly from the event handler rather than from
+inside an outer updater, so the hazard doesn't apply there. `npm run
+build` passes clean.
+
+**Not independently verified beyond rebuilding**: this is a React
+scheduling/batching bug, not a pure-logic one, so it can't be caught by
+a Node script the way `matchWord.js` was fuzz-tested. Confirming it's
+actually fixed needs a real browser, the standing gap this whole doc
+keeps flagging.
+
 ## Social-share OG image added: 2026-10-07
 
 No sibling repo had a committed generator for this (each one's
