@@ -38,6 +38,21 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
   const movedRef = useRef(false);
   const downCellRef = useRef(null);
   const gridRef = useRef(null);
+  // Mirrors currentPath, written synchronously by this component's own
+  // handlers instead of read back from the currentPath prop. On a fast
+  // tap (touchstart immediately followed by touchend), there isn't
+  // always a render between the two events, so the currentPath prop can
+  // still reflect the PREVIOUS tap's path when pointerUp fires, one
+  // gesture behind. That made the match-check on the final letter of a
+  // word run against the path as it stood before that letter was added,
+  // so tapping a word out never completed it (dragging worked because a
+  // drag has real time between moves for React to re-render). Reading
+  // and writing this ref imperatively in the same call as each pointer
+  // event removes any dependency on render timing.
+  const pathRef = useRef(currentPath);
+  useEffect(() => {
+    pathRef.current = currentPath;
+  }, [currentPath]);
 
   const currentPathSet = new Set(currentPath.map(cellKey));
 
@@ -64,14 +79,15 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
   // Used both to seed a gesture on pointerdown and to build up a path
   // purely by tapping, letter by letter, across separate gestures.
   const nextPathFor = useCallback((r, c) => {
-    if (currentPath.length === 0) return [[r, c]];
-    const last = currentPath[currentPath.length - 1];
-    if (last[0] === r && last[1] === c) return currentPath.slice(0, -1);
-    if (isAdjacent8(last, [r, c]) && !currentPath.some(([pr, pc]) => pr === r && pc === c)) {
-      return [...currentPath, [r, c]];
+    const path = pathRef.current;
+    if (path.length === 0) return [[r, c]];
+    const last = path[path.length - 1];
+    if (last[0] === r && last[1] === c) return path.slice(0, -1);
+    if (isAdjacent8(last, [r, c]) && !path.some(([pr, pc]) => pr === r && pc === c)) {
+      return [...path, [r, c]];
     }
     return [[r, c]];
-  }, [currentPath]);
+  }, []);
 
   const handlePointerDown = useCallback((r, c) => {
     if (locked) return;
@@ -79,7 +95,9 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
     drawingRef.current = true;
     movedRef.current = false;
     downCellRef.current = [r, c];
-    onPathChange(nextPathFor(r, c));
+    const next = nextPathFor(r, c);
+    pathRef.current = next;
+    onPathChange(next);
   }, [locked, foundCells, onPathChange, nextPathFor]);
 
   const handlePointerMove = useCallback((e) => {
@@ -93,44 +111,54 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
     const down = downCellRef.current;
     if (down && (r !== down[0] || c !== down[1])) movedRef.current = true;
     if (foundCells.has(cellKey(pos))) return;
-    onPathChange((prev) => {
-      if (prev.length === 0) return prev;
-      const last = prev[prev.length - 1];
-      if (last[0] === r && last[1] === c) return prev;
-      if (prev.length >= 2) {
-        const secondLast = prev[prev.length - 2];
-        if (secondLast[0] === r && secondLast[1] === c) return prev.slice(0, -1);
-      }
-      if (!isAdjacent8(last, pos)) return prev;
+
+    const prev = pathRef.current;
+    if (prev.length === 0) return;
+    const last = prev[prev.length - 1];
+    if (last[0] === r && last[1] === c) return;
+    let next = null;
+    if (prev.length >= 2) {
+      const secondLast = prev[prev.length - 2];
+      if (secondLast[0] === r && secondLast[1] === c) next = prev.slice(0, -1);
+    }
+    if (next === null) {
+      if (!isAdjacent8(last, pos)) return;
       const prevSet = new Set(prev.map(cellKey));
-      if (prevSet.has(cellKey(pos))) return prev;
-      return [...prev, pos];
-    });
+      if (prevSet.has(cellKey(pos))) return;
+      next = [...prev, pos];
+    }
+    pathRef.current = next;
+    onPathChange(next);
   }, [locked, cellFromPoint, foundCells, onPathChange]);
 
-  // Reads currentPath directly (the prop) rather than via a setCurrentPath
-  // functional updater. onSubmit/onTapCheck can themselves call
-  // setCurrentPath (applyFound clears it to [] on a match), and nesting
-  // that inside this updater's own setCurrentPath call meant React could
-  // apply this updater's "return prev unchanged" AFTER the nested clear,
-  // silently reviving the just-completed word's path instead of leaving
-  // it cleared. Confirmed live: finishing CLOSET then starting VINEGAR
-  // showed "CLOSETVINEGAR" in the attempt display, the completed word's
-  // path never actually cleared. Same nested-setState-in-updater hazard
-  // as the ref-based bug Tandem's time bonus hit before (see
-  // project_noodle_games memory); fix is the same, stop relying on
-  // ordering between two state updates to the same piece of state and
-  // just read the already-current prop instead.
+  // Reads pathRef (synced imperatively by this component's own handlers,
+  // see the comment on its declaration above) rather than the currentPath
+  // prop, and rather than a setCurrentPath functional updater. Both of
+  // those depend on React's render/commit timing, which this doesn't:
+  // - A functional updater nests badly: onSubmit/onTapCheck can themselves
+  //   call setCurrentPath (applyFound clears it to [] on a match), and
+  //   nesting that inside this updater's own setCurrentPath call meant
+  //   React could apply this updater's "return prev unchanged" AFTER the
+  //   nested clear, silently reviving the just-completed word's path
+  //   instead of leaving it cleared (confirmed live: finishing CLOSET
+  //   then starting VINEGAR showed "CLOSETVINEGAR").
+  // - The currentPath prop lags by a gesture on a fast tap: touchstart
+  //   immediately followed by touchend doesn't always leave time for a
+  //   render in between, so the prop can still be the PREVIOUS tap's path
+  //   when this fires. That made tapping a word's last letter check the
+  //   path as it stood before that letter was added, so tap-to-build
+  //   never actually completed a word, only dragging did.
   const handlePointerUp = useCallback(() => {
     if (!drawingRef.current) return;
     drawingRef.current = false;
-    if (currentPath.length === 0) return;
+    const path = pathRef.current;
+    if (path.length === 0) return;
     if (movedRef.current) {
-      onSubmit(currentPath);
+      onSubmit(path);
     } else {
-      onTapCheck(currentPath);
+      onTapCheck(path);
     }
-  }, [currentPath, onSubmit, onTapCheck]);
+  }, [onSubmit, onTapCheck]);
 
   useEffect(() => {
     const el = gridRef.current;
