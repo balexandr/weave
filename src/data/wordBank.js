@@ -8,6 +8,16 @@
 // documents: a fixed list can never cover every real word a player
 // might try to trace. Content gaps get reported and patched over time,
 // not pre-solved.
+//
+// Pre-deploy once-over (2026-10-07): read through every word by hand,
+// all 323 are real, correctly-spelled, common English words, nothing
+// flagged. Also fixed the length-bucket comments below, several words
+// had drifted into the wrong bucket as entries got added incrementally
+// (e.g. "candle" and "crayon" sitting under "length 5" despite being
+// 6 letters). Purely cosmetic, scripts/*.mjs compute real lengths
+// programmatically so this never affected the actual game, but
+// confusing to read. Re-sorted by actual length, 0 words added or
+// removed (323 before, 323 after).
 export const WORD_BANK = [
   // length 3
   'cat', 'dog', 'sun', 'fox', 'owl', 'bee', 'ant', 'pig', 'cow', 'bat',
@@ -22,38 +32,39 @@ export const WORD_BANK = [
   'soup', 'rice', 'bean', 'corn', 'peas', 'herb', 'sage', 'mint', 'lime', 'plum',
   'pear', 'kiwi', 'cape', 'gate', 'lock', 'knob', 'door', 'wall', 'roof', 'lamp',
   'sock', 'belt', 'coat', 'vest', 'boot', 'ring', 'gold', 'iron', 'coal', 'salt',
+  'comb', 'toad',
 
   // length 5
   'tiger', 'zebra', 'camel', 'horse', 'mouse', 'otter', 'beach', 'ocean', 'river', 'field',
   'cloud', 'storm', 'stone', 'brick', 'glass', 'metal', 'paper', 'cloth', 'wheel', 'chair',
-  'table', 'couch', 'shelf', 'candy', 'spoon', 'knife', 'plate', 'towel', 'brush', 'comb',
-  'glove', 'scarf', 'shirt', 'skirt', 'dress', 'pants', 'apple', 'grape', 'lemon', 'melon',
-  'onion', 'wheat', 'toast', 'bacon', 'juice', 'bread', 'sugar', 'honey', 'cream', 'candle',
-  'clock', 'watch', 'radio', 'phone', 'music', 'movie', 'novel', 'story', 'paint', 'crayon',
-  'eagle', 'shark', 'whale', 'snake', 'toad', 'goose',
+  'table', 'couch', 'shelf', 'candy', 'spoon', 'knife', 'plate', 'towel', 'brush', 'glove',
+  'scarf', 'shirt', 'skirt', 'dress', 'pants', 'apple', 'grape', 'lemon', 'melon', 'onion',
+  'wheat', 'toast', 'bacon', 'juice', 'bread', 'sugar', 'honey', 'cream', 'clock', 'watch',
+  'radio', 'phone', 'music', 'movie', 'novel', 'story', 'paint', 'eagle', 'shark', 'whale',
+  'snake', 'goose', 'attic',
 
   // length 6
-  'garden', 'forest', 'valley', 'meadow', 'desert', 'island', 'bridge', 'castle', 'tunnel', 'cavern',
-  'basket', 'bottle', 'pencil', 'eraser', 'ladder', 'hammer', 'wrench', 'shovel', 'pillow', 'blanket',
-  'window', 'ceiling', 'mirror', 'closet', 'kitchen', 'garage', 'attic', 'cellar', 'orange', 'banana',
-  'cherry', 'coffee', 'butter', 'cheese', 'cookie', 'noodle', 'salmon', 'turkey', 'rabbit', 'turtle',
-  'monkey', 'donkey', 'beetle', 'cricket', 'spider', 'feather', 'branch', 'jungle', 'canyon', 'summit',
-  'violin', 'guitar', 'trumpet', 'wallet', 'sandal', 'jacket', 'sweater', 'helmet', 'engine', 'rocket',
+  'candle', 'crayon', 'garden', 'forest', 'valley', 'meadow', 'desert', 'island', 'bridge', 'castle',
+  'tunnel', 'cavern', 'basket', 'bottle', 'pencil', 'eraser', 'ladder', 'hammer', 'wrench', 'shovel',
+  'pillow', 'window', 'mirror', 'closet', 'garage', 'cellar', 'orange', 'banana', 'cherry', 'coffee',
+  'butter', 'cheese', 'cookie', 'noodle', 'salmon', 'turkey', 'rabbit', 'turtle', 'monkey', 'donkey',
+  'beetle', 'spider', 'branch', 'jungle', 'canyon', 'summit', 'violin', 'guitar', 'wallet', 'sandal',
+  'jacket', 'helmet', 'engine', 'rocket', 'harbor', 'anchor', 'walnut', 'peanut', 'gravel', 'pebble',
 
   // length 7
-  'chimney', 'balcony', 'hallway', 'library', 'stadium', 'harbor', 'volcano', 'glacier',
-  'compass', 'lantern', 'anchor', 'cabinet', 'curtain', 'mattress', 'bicycle', 'scooter', 'trailer',
-  'raccoon', 'penguin', 'octopus', 'dolphin', 'panther', 'leopard', 'giraffe', 'buffalo', 'sparrow', 'peacock',
-  'pumpkin', 'spinach', 'avocado', 'coconut', 'walnut', 'peanut', 'mustard', 'ketchup', 'vinegar', 'oatmeal',
-  'blossom', 'thicket', 'gravel', 'pebble', 'boulder', 'thunder', 'blizzard', 'tornado', 'rainbow', 'sunrise',
+  'blanket', 'ceiling', 'kitchen', 'cricket', 'feather', 'trumpet', 'sweater', 'chimney', 'balcony', 'hallway',
+  'library', 'stadium', 'volcano', 'glacier', 'compass', 'lantern', 'cabinet', 'curtain', 'bicycle', 'scooter',
+  'trailer', 'raccoon', 'penguin', 'octopus', 'dolphin', 'panther', 'leopard', 'giraffe', 'buffalo', 'sparrow',
+  'peacock', 'pumpkin', 'spinach', 'avocado', 'coconut', 'mustard', 'ketchup', 'vinegar', 'oatmeal', 'blossom',
+  'thicket', 'boulder', 'thunder', 'tornado', 'rainbow', 'sunrise', 'hamster', 'pancake', 'cabbage', 'popcorn',
+  'pathway', 'doorway',
 
   // length 8
-  'mountain', 'elephant', 'squirrel', 'dinosaur', 'crocodile', 'flamingo', 'hedgehog', 'kangaroo', 'hamster',
-  'umbrella', 'backpack', 'notebook', 'calendar', 'envelope', 'scissors', 'necklace', 'suitcase', 'keyboard', 'computer',
-  'sandwich', 'pancake', 'meatball', 'broccoli', 'zucchini', 'cucumber', 'cabbage', 'doughnut', 'popcorn',
-  'sunlight', 'seashell', 'woodland', 'hillside', 'moonlight', 'waterfall', 'driftwood', 'pathway', 'doorway', 'footprint',
+  'mattress', 'blizzard', 'mountain', 'elephant', 'squirrel', 'dinosaur', 'flamingo', 'hedgehog', 'kangaroo', 'umbrella',
+  'backpack', 'notebook', 'calendar', 'envelope', 'scissors', 'necklace', 'suitcase', 'keyboard', 'computer', 'sandwich',
+  'meatball', 'broccoli', 'zucchini', 'cucumber', 'doughnut', 'sunlight', 'seashell', 'woodland', 'hillside',
 
   // length 9
-  'butterfly', 'chocolate', 'blueberry', 'raspberry', 'pineapple', 'cranberry', 'asparagus', 'artichoke',
-  'porcupine', 'alligator', 'chameleon', 'dragonfly',
+  'crocodile', 'moonlight', 'waterfall', 'driftwood', 'footprint', 'butterfly', 'chocolate', 'blueberry', 'raspberry', 'pineapple',
+  'cranberry', 'asparagus', 'artichoke', 'porcupine', 'alligator', 'chameleon', 'dragonfly',
 ];
