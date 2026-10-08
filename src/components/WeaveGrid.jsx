@@ -160,20 +160,37 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
     }
   }, [onSubmit, onTapCheck]);
 
+  // Raw, non-passive touchstart (not React's onTouchStart, see below)
+  // so preventDefault actually suppresses the browser's ~300ms-later
+  // synthetic mousedown/mouseup/click replay for this gesture. Without
+  // it, that replay lands on the same cell after the real tap and
+  // handlePointerDown's own "tap the last cell again to undo" rule
+  // reads it as a second tap, instantly deselecting the letter that
+  // was just picked, same cell flashes on then off.
+  const handleTouchStart = useCallback((e) => {
+    const touch = e.touches[0];
+    const cell = cellFromPoint(touch.clientX, touch.clientY);
+    if (!cell) return;
+    e.preventDefault();
+    handlePointerDown(cell[0], cell[1]);
+  }, [cellFromPoint, handlePointerDown]);
+
   useEffect(() => {
     const el = gridRef.current;
     if (!el) return;
+    el.addEventListener('touchstart', handleTouchStart, { passive: false });
     el.addEventListener('touchmove', handlePointerMove, { passive: false });
     el.addEventListener('touchend', handlePointerUp, { passive: false });
     window.addEventListener('mousemove', handlePointerMove);
     window.addEventListener('mouseup', handlePointerUp);
     return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
       el.removeEventListener('touchmove', handlePointerMove);
       el.removeEventListener('touchend', handlePointerUp);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('mouseup', handlePointerUp);
     };
-  }, [handlePointerMove, handlePointerUp]);
+  }, [handleTouchStart, handlePointerMove, handlePointerUp]);
 
   return (
     <div className={styles.boardFrame}>
@@ -182,10 +199,6 @@ export default function WeaveGrid({ puzzle, currentPath, onPathChange, onSubmit,
         style={{ aspectRatio: `${cols} / ${rows}` }}
         ref={gridRef}
         onMouseDown={(e) => {
-          const cell = e.target.closest('[data-row]');
-          if (cell) handlePointerDown(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
-        }}
-        onTouchStart={(e) => {
           const cell = e.target.closest('[data-row]');
           if (cell) handlePointerDown(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
         }}
