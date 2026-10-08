@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getTierFromHints, formatElapsed } from '../utils/scoring';
+import { IconTrophy, IconFlame, IconThumbsUp, IconClose, IconShare, IconCheckmark, IconStar } from './Icons';
 import styles from './ResultScreen.module.css';
 
 function getTimeToMidnight() {
@@ -18,9 +19,9 @@ function getTimeToMidnight() {
 function pad(n) { return String(n).padStart(2, '0'); }
 
 function getRating(tier) {
-  if (tier === 3) return { emoji: '🏆', label: 'Every Thread' };
-  if (tier === 2) return { emoji: '🔥', label: 'Well Woven' };
-  return { emoji: '👍', label: 'Solved' };
+  if (tier === 3) return { Icon: IconTrophy, label: 'Every Thread' };
+  if (tier === 2) return { Icon: IconFlame, label: 'Well Woven' };
+  return { Icon: IconThumbsUp, label: 'Solved' };
 }
 
 export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elapsedSeconds, generateShareText, stats, onDismiss }) {
@@ -77,8 +78,8 @@ export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elaps
         </div>
 
         <div className={styles.resultHeader}>
-          <button className={styles.dismissBtn} onClick={onDismiss} aria-label="Close">✕</button>
-          <span className={styles.ratingEmoji}>{rating.emoji}</span>
+          <button className={styles.dismissBtn} onClick={onDismiss} aria-label="Close"><IconClose /></button>
+          <span className={styles.ratingEmoji}><rating.Icon /></span>
           <h2 className={styles.title}>{rating.label}!</h2>
           <p className={styles.subtitle}>Weave #{puzzleNumber}</p>
         </div>
@@ -95,7 +96,11 @@ export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elaps
           </div>
           <div className={styles.metricDivider} />
           <div className={styles.metric}>
-            <span className={styles.metricValue}>{tier > 0 ? '⭐'.repeat(tier) : '0'}</span>
+            <span className={styles.metricValue}>
+              {tier > 0
+                ? Array.from({ length: tier }).map((_, i) => <IconStar key={i} size={20} />)
+                : '0'}
+            </span>
             <span className={styles.metricLabel}>Rating</span>
           </div>
         </div>
@@ -132,7 +137,7 @@ export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elaps
           className={`${styles.shareButton} ${copied ? styles.copied : ''}`}
           onClick={handleShare}
         >
-          {copied ? '✓ Copied to clipboard' : '⬆ Share your result'}
+          {copied ? <><IconCheckmark /> Copied to clipboard</> : <><IconShare /> Share your result</>}
         </button>
 
         <div className={styles.countdown}>

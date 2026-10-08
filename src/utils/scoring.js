@@ -7,10 +7,6 @@ export function getTierFromHints(hintsUsed) {
   return 1;
 }
 
-export function starsText(stars) {
-  return stars > 0 ? '⭐'.repeat(stars) : '0';
-}
-
 export function formatElapsed(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;

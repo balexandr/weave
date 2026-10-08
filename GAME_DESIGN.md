@@ -559,3 +559,50 @@ regardless of what fonts are installed on the machine doing the
 rendering. Iterated on centering by actually rendering and viewing the
 PNG (the icon+wordmark row was initially off-center, measured and
 corrected), not just eyeballing the SVG coordinates.
+
+## Emoji replaced with real icons: 2026-10-07
+
+User asked to replace emoji in the UI with real icons across every
+NoodleGame, one game at a time, to read less like default AI output.
+Checked a sibling (Realm) first to confirm scope: every game in the
+suite uses the same emoji-heavy pattern (👑, 🏆, 🎯, ✕, ⬆, etc.), so
+this isn't a Weave-specific fix, it's a suite-wide pass. Starting with
+Weave since it's the one open; the rest of the suite is a separate pass,
+not done in this session (11 other live, deployed repos, too much to
+responsibly rush through in one sitting).
+
+**What was NOT touched, deliberately**: the actual share text
+(`useGameState.js`'s `generateShareText`, and `shareAll.js`'s shared
+header) still uses real emoji (🧶, ⭐, 💡, 🍜). That text gets sent
+through SMS/clipboard as plain characters, a custom SVG icon can't
+survive that trip, so the Wordle-style "emoji result grid" convention
+the whole suite already uses there is correct and stays as-is. Swapping
+those would just break sharing.
+
+**What changed**: every emoji in the rendered UI. New file
+`src/components/Icons.jsx`, ten small line-art components (drag, check-
+circle, x-circle, bulb, trophy, flame, thumbs-up, close, share,
+checkmark) plus a star and an empty-state weave-mark, all matching the
+visual language the header's stats icon already established (24x24
+viewBox, `currentColor` stroke, rounded caps) rather than inventing a
+new style. Wired into `HowToPlay.jsx` (4 step icons), `ResultScreen.jsx`
+(rating badge, close button, star rating row, share button),
+`StatsScreen.jsx` (close button, star distribution rows), and
+`App.jsx` (hint button, empty-state mark, footer share-all button).
+Removed `starsText()` from `scoring.js`, dead code once its only
+caller (StatsScreen) switched to rendering real `IconStar` elements.
+
+**Verified by actually rendering the icons**, not just reading the SVG
+markup: rasterized all 11 with `sharp` into a sprite sheet and viewed
+it, caught nothing wrong but confirmed every shape reads correctly at
+the actual size used (checkmark, X, bulb, trophy, flame, thumbs-up,
+star, close, share-arrow, drag, and the weave-mark empty-state icon all
+legible and on-theme). `npm run build` passes clean, re-scanned the
+whole `src/` tree afterward and confirmed only the two share-text files
+still contain emoji, by design.
+
+**Not verified**: how these actually look laid out in the real running
+app (spacing, alignment, hover states) still needs a real browser pass,
+same standing gap as everywhere else in this doc. The rendered-sprite-
+sheet check proves the icon shapes are correct, not that they're
+positioned well inside their buttons/rows.
