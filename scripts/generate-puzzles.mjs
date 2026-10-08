@@ -16,8 +16,8 @@ import { dirname, join } from 'path';
 import { WORD_BANK } from '../src/data/wordBank.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const EPOCH = '2026-09-27';
-const END_DATE = '2026-12-31';
+const EPOCH = '2026-10-08';
+const END_DATE = '2027-01-11';
 
 // Monday through Sunday, ramping up same shape as Mirror/Pathways/Sprout/
 // Realm's weekday difficulty curves: small and easy early in the week,

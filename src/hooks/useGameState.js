@@ -4,7 +4,7 @@ import { getTierFromHints, formatElapsed } from '../utils/scoring';
 import { matchWord } from '../utils/matchWord';
 
 const STORAGE_KEY = 'weave-game-state';
-const EPOCH = '2026-09-27';
+const EPOCH = '2026-10-08';
 const MAX_HINTS = 3;
 
 function getTodayKey() {

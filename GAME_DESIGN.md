@@ -606,3 +606,32 @@ app (spacing, alignment, hover states) still needs a real browser pass,
 same standing gap as everywhere else in this doc. The rendered-sprite-
 sheet check proves the icon shapes are correct, not that they're
 positioned well inside their buttons/rows.
+
+## Epoch reset for real launch: 2026-10-07
+
+User asked that tomorrow's puzzle show as #1 when real players see it.
+Same move Mirror made before its own real launch (see that section
+above): everything generated and played since the original build
+(2026-09-27) was build/iteration content, not real puzzle history, so
+resetting the epoch rather than trying to preserve day-count continuity
+is correct here, not a shortcut.
+
+`EPOCH` moved from `2026-09-27` to `2026-10-08` (tomorrow, relative to
+today 2026-10-07) in both `scripts/generate-puzzles.mjs` and
+`useGameState.js` (these two copies have to agree, same as every
+constant that exists in both the offline generator and the runtime).
+`END_DATE` pushed from `2026-12-31` to `2027-01-11`, matching the
+original ~96-day runway rather than shrinking it by the 11 days the
+epoch moved forward. Puzzle data fully regenerated from the new epoch
+(today, 2026-10-07, is no longer in `puzzles.json` at all, it was
+dev/testing content under the old epoch and doesn't carry forward).
+
+Verified: `(2026-10-08 - EPOCH)/86400000 + 1 = 1` checked directly
+against the real formula, not assumed. `verify-puzzles.mjs` and
+`check-ambiguity.mjs` pass clean on the regenerated 96 puzzles (596
+total words this time, the weekday-size mix shifted slightly since
+which day-of-week lands on which calendar date changed). `npm run
+build` passes clean. Today (2026-10-07) falling out of the puzzle
+data means the app will show its "No puzzle today" empty state if
+visited today, by design, not a bug, exactly mirroring what a genuine
+reset should do.
