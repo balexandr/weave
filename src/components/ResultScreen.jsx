@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getTierFromHints, formatElapsed } from '../utils/scoring';
-import { IconTrophy, IconFlame, IconThumbsUp, IconClose, IconShare, IconCheckmark, IconStar } from './Icons';
+import { IconTrophy, IconFlame, IconThumbsUp, IconClose, IconShare, IconCheckmark, IconStar, IconLeaderboard } from './Icons';
 import styles from './ResultScreen.module.css';
 
 function getTimeToMidnight() {
@@ -24,7 +24,7 @@ function getRating(tier) {
   return { Icon: IconThumbsUp, label: 'Solved' };
 }
 
-export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elapsedSeconds, generateShareText, stats, onDismiss }) {
+export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elapsedSeconds, generateShareText, stats, onDismiss, onViewLeaderboard }) {
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(getTimeToMidnight());
   const [showContent, setShowContent] = useState(false);
@@ -138,6 +138,10 @@ export default function ResultScreen({ puzzleNumber, wordCount, hintsUsed, elaps
           onClick={handleShare}
         >
           {copied ? <><IconCheckmark /> Copied to clipboard</> : <><IconShare /> Share your result</>}
+        </button>
+
+        <button className={styles.leaderboardButton} onClick={onViewLeaderboard}>
+          <IconLeaderboard size={16} /> View today's leaderboard
         </button>
 
         <div className={styles.countdown}>

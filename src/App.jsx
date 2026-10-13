@@ -5,12 +5,14 @@ import WeaveGrid from './components/WeaveGrid';
 import ResultScreen from './components/ResultScreen';
 import HowToPlay from './components/HowToPlay';
 import StatsScreen from './components/StatsScreen';
+import LeaderboardPanel from './components/LeaderboardPanel';
 import styles from './App.module.css';
 import { GameLogo } from './components/GameLogo';
 import { NoodleLogoIcon } from './components/NoodleLogo';
 import { recordTodayShare, getCompletedTodayCount, buildShareAllText, TOTAL_GAMES } from './utils/shareAll';
 import { getTierFromHints, formatElapsed } from './utils/scoring';
-import { IconBulb, IconCheckmark, IconShare, IconWeaveMark } from './components/Icons';
+import { toLeaderboardScore } from './utils/leaderboardScore';
+import { IconBulb, IconCheckmark, IconShare, IconWeaveMark, IconLeaderboard } from './components/Icons';
 
 const HOW_TO_PLAY_KEY = 'weave-how-to-play-seen';
 
@@ -41,6 +43,7 @@ export default function App() {
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
   const [revealResult, setRevealResult] = useState(false);
   const [shareAllCount, setShareAllCount] = useState(0);
@@ -154,6 +157,9 @@ export default function App() {
           {puzzleNumber > 0 && <span className={styles.puzzleNumber}>#{puzzleNumber}</span>}
         </div>
         <div className={styles.headerRight}>
+          <button className={styles.iconButton} onClick={() => setShowLeaderboard(true)} aria-label="Leaderboard">
+            <IconLeaderboard size={20} />
+          </button>
           <button className={styles.iconButton} onClick={() => setShowStats(true)} aria-label="Statistics">
             <svg className={styles.statsIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M4 20H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -225,11 +231,19 @@ export default function App() {
           generateShareText={generateShareText}
           stats={stats}
           onDismiss={() => setResultDismissed(true)}
+          onViewLeaderboard={() => setShowLeaderboard(true)}
         />
       )}
 
       {showHowToPlay && <HowToPlay onClose={dismissHowToPlay} />}
       {showStats && <StatsScreen stats={stats} onClose={() => setShowStats(false)} />}
+      {showLeaderboard && (
+        <LeaderboardPanel
+          dateKey={dateKey}
+          pendingScore={gameStatus === 'won' ? toLeaderboardScore(hintsUsed, elapsedSeconds) : null}
+          onClose={() => setShowLeaderboard(false)}
+        />
+      )}
 
       {footer}
     </div>
