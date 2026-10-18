@@ -16,8 +16,8 @@ word. Any direction, including diagonals.
 - Spell a real word from the puzzle and it locks in, those letters light
   up and stay found.
 - Every word that day shares a real theme (e.g. "Food, Glorious
-  Food"), shown at the bottom of the grid. Find every one until the
-  whole grid is highlighted.
+  Food"), shown in a badge at the top of the puzzle. Find every one
+  until the whole grid is highlighted.
 - Wrong guess costs nothing: the path just resets. No penalty, no fail
   state, take your time.
 - Stuck? Use a hint (3 available). Each one reveals the starting letter

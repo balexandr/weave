@@ -23,7 +23,7 @@ export default function HowToPlay({ onClose }) {
             <span className={styles.stepIcon}><IconCheckCircle /></span>
             <div>
               <p className={styles.stepTitle}>Spell a real word? It locks in</p>
-              <p className={styles.stepDesc}>Those letters light up and stay found. Every word that day shares a theme, shown at the bottom of the grid.</p>
+              <p className={styles.stepDesc}>Those letters light up and stay found. Every word that day shares a theme, shown at the top of the puzzle.</p>
             </div>
           </div>
           <div className={styles.step}>

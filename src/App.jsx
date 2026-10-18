@@ -193,6 +193,11 @@ export default function App() {
       </header>
 
       <main className={styles.main}>
+        <div className={styles.themeBadge}>
+          <span className={styles.themeLabel}>Today's theme</span>
+          <span className={styles.themeName}>{puzzle.theme}</span>
+        </div>
+
         <div className={styles.statusBar}>
           <div className={styles.timerBlock} style={{ paddingLeft: 0, borderLeft: 'none' }}>
             <span className={styles.timerLabel}>Time</span>
@@ -237,7 +242,7 @@ export default function App() {
 
         {gameStatus === 'playing' && (
           <p className={styles.hint}>
-            Every letter belongs to exactly one word. Today's theme: <strong>{puzzle.theme}</strong>
+            Every letter belongs to exactly one word.
           </p>
         )}
       </main>
