@@ -237,7 +237,7 @@ export default function App() {
 
         {gameStatus === 'playing' && (
           <p className={styles.hint}>
-            Every letter belongs to exactly one word. No theme connects them, just find them all
+            Every letter belongs to exactly one word. Today's theme: <strong>{puzzle.theme}</strong>
           </p>
         )}
       </main>

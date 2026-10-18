@@ -10,10 +10,21 @@
 // placement (longest word first) with whole-puzzle retry on failure, same
 // "best-of-N random, keep hardest" class of approach Mirror's multi-beam
 // generator used once exact search stopped scaling.
+//
+// Themed as of 2026-10-17: each day now draws its ENTIRE word set from
+// ONE category in THEMES (wordBank.js), not the flat cross-category bank,
+// so every word on a given day's grid shares a real theme (e.g. "Kitchen
+// & Pantry") shown to the player. Themes are assigned by cycling a
+// shuffled order of all categories and reshuffling each time it's
+// exhausted, which spreads them evenly across the run and never repeats
+// a theme immediately. If a theme's own word pool can't fill a
+// particular grid size (thin bank, bad luck), that date falls back to
+// trying the other themes in the same cycle before giving up, so a
+// single under-provisioned category can't fail the whole generation run.
 import { writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { WORD_BANK } from '../src/data/wordBank.js';
+import { THEMES, THEME_NAMES } from '../src/data/wordBank.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EPOCH = '2026-10-08';
@@ -57,9 +68,9 @@ function shuffle(arr) {
 // exactly `cellCount`. Retries with a fresh shuffle on failure rather than
 // backtracking the sum itself. Cheap, and the bank is diverse enough in
 // length that a fresh shuffle usually finds an exact fit quickly.
-function pickWordSet(cellCount) {
+function pickWordSet(cellCount, themeWords) {
   for (let attempt = 0; attempt < 500; attempt++) {
-    const pool = shuffle(WORD_BANK);
+    const pool = shuffle(themeWords);
     const picked = [];
     let remaining = cellCount;
     for (const w of pool) {
@@ -163,13 +174,19 @@ function placeWord(word, assigned, rows, cols) {
   return null;
 }
 
-// Bank words grouped by length, for the repair step below: swapping an
+// Theme words grouped by length, for the repair step below: swapping an
 // ambiguous word for a different word of the SAME length (so it still
 // fits the cells it was placed in) without needing to re-run placement.
-const BANK_BY_LENGTH = {};
-for (const w of WORD_BANK) {
-  const upper = w.toUpperCase();
-  (BANK_BY_LENGTH[upper.length] ??= []).push(upper);
+// Scoped to one theme's words (not the whole bank) so a repair swap can
+// never pull in a word from an unrelated category and break the day's
+// theme.
+function bankByLength(themeWords) {
+  const byLength = {};
+  for (const w of themeWords) {
+    const upper = w.toUpperCase();
+    (byLength[upper.length] ??= []).push(upper);
+  }
+  return byLength;
 }
 
 // First cut of this generator rejected the whole puzzle and restarted
@@ -187,14 +204,14 @@ for (const w of WORD_BANK) {
 // it. Measured success per base attempt across all 7 weekday sizes:
 // 11.9% (Mon, 4x5) down to 0.57% (Sun, 6x8), all under 350ms for 3000
 // attempts, versus ~0.005%-0.06% without repair.
-function repairAmbiguity(grid, paths) {
+function repairAmbiguity(grid, paths, bankByLen) {
   const used = new Set(Object.keys(paths));
   for (let attempt = 0; attempt < 200; attempt++) {
     const bad = ambiguousWordsIn(Object.keys(paths), grid);
     if (bad.length === 0) return true;
 
     const target = bad[Math.floor(Math.random() * bad.length)];
-    const candidates = shuffle((BANK_BY_LENGTH[target.length] || []).filter((w) => w !== target && !used.has(w)));
+    const candidates = shuffle((bankByLen[target.length] || []).filter((w) => w !== target && !used.has(w)));
 
     let repaired = false;
     for (const candidate of candidates) {
@@ -224,10 +241,11 @@ function repairAmbiguity(grid, paths) {
 
 const OUTER_ATTEMPTS = 20000;
 
-function generatePuzzle(rows, cols) {
+function generatePuzzle(rows, cols, themeWords) {
   const cellCount = rows * cols;
+  const bankByLen = bankByLength(themeWords);
   for (let outer = 0; outer < OUTER_ATTEMPTS; outer++) {
-    const words = pickWordSet(cellCount);
+    const words = pickWordSet(cellCount, themeWords);
     if (!words) continue;
     // Longest first, since fewer free cells later makes long words harder to
     // place, so place them while there's the most room.
@@ -253,11 +271,30 @@ function generatePuzzle(rows, cols) {
     // Every word must have EXACTLY one valid grid embedding, its own
     // assigned path, so there's never a "wrong instance of a repeated
     // letter" trap.
-    if (!repairAmbiguity(grid, paths)) continue;
+    if (!repairAmbiguity(grid, paths, bankByLen)) continue;
 
     return { grid, words: Object.keys(paths).sort(), paths };
   }
   return null;
+}
+
+// Cycles through every theme in a freshly shuffled order each time the
+// cycle empties out, so themes spread evenly across the run and the same
+// theme never repeats back-to-back (the last theme of one shuffle is
+// never the first of the next, see the retry loop below).
+function makeThemeCycler() {
+  let order = [];
+  let lastTheme = null;
+  return function next() {
+    if (order.length === 0) {
+      do {
+        order = shuffle(THEME_NAMES);
+      } while (THEME_NAMES.length > 1 && order[0] === lastTheme);
+    }
+    const theme = order.shift();
+    lastTheme = theme;
+    return theme;
+  };
 }
 
 function addDays(dateStr, n) {
@@ -266,20 +303,34 @@ function addDays(dateStr, n) {
   return d.toISOString().slice(0, 10);
 }
 
+const nextTheme = makeThemeCycler();
+
 const puzzles = {};
 let dateKey = EPOCH;
 let day = 0;
 while (dateKey <= END_DATE) {
   const [rows, cols] = gridSizeForDate(dateKey);
-  const puzzle = generatePuzzle(rows, cols);
+  const primaryTheme = nextTheme();
+  let puzzle = generatePuzzle(rows, cols, THEMES[primaryTheme]);
+  let theme = primaryTheme;
   if (!puzzle) {
-    console.error(`FAILED to generate puzzle for ${dateKey} (${rows}x${cols})`);
+    // Primary pick couldn't fill this grid size (thin theme, bad luck) -
+    // fall back through the other themes rather than failing the whole
+    // run over one under-provisioned category.
+    for (const fallback of THEME_NAMES) {
+      if (fallback === primaryTheme) continue;
+      puzzle = generatePuzzle(rows, cols, THEMES[fallback]);
+      if (puzzle) { theme = fallback; break; }
+    }
+  }
+  if (!puzzle) {
+    console.error(`FAILED to generate puzzle for ${dateKey} (${rows}x${cols}), every theme exhausted`);
     process.exit(1);
   }
-  puzzles[dateKey] = puzzle;
+  puzzles[dateKey] = { ...puzzle, theme };
   day += 1;
   dateKey = addDays(EPOCH, day);
 }
 
 writeFileSync(join(__dirname, '../src/data/puzzles.json'), JSON.stringify(puzzles, null, 2));
-console.log(`Generated ${Object.keys(puzzles).length} puzzles, ${EPOCH} through ${END_DATE}, sized by weekday (Mon 4x5 -> Sun 6x8).`);
+console.log(`Generated ${Object.keys(puzzles).length} themed puzzles, ${EPOCH} through ${END_DATE}, sized by weekday (Mon 4x5 -> Sun 6x8).`);

@@ -4,10 +4,14 @@
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { WORD_BANK } from '../src/data/wordBank.js';
+import { THEMES, THEME_NAMES } from '../src/data/wordBank.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const BANK_SET = new Set(WORD_BANK.map((w) => w.toUpperCase()));
+const BANK_SET = new Set(THEME_NAMES.flatMap((name) => THEMES[name]).map((w) => w.toUpperCase()));
+const THEME_WORD_SET = {};
+for (const name of THEME_NAMES) {
+  THEME_WORD_SET[name] = new Set(THEMES[name].map((w) => w.toUpperCase()));
+}
 
 const puzzles = JSON.parse(readFileSync(join(__dirname, '../src/data/puzzles.json'), 'utf-8'));
 
@@ -20,8 +24,10 @@ let totalWords = 0;
 const dates = Object.keys(puzzles).sort();
 
 for (const date of dates) {
-  const { grid, words, paths } = puzzles[date];
+  const { grid, words, paths, theme } = puzzles[date];
   const label = (msg) => { console.error(`[${date}] ${msg}`); errors++; };
+
+  if (!theme || !THEME_NAMES.includes(theme)) label(`theme "${theme}" is not a known category`);
 
   const rows = grid.length;
   const cols = grid[0]?.length || 0;
@@ -35,6 +41,9 @@ for (const date of dates) {
   const claimedCells = new Set();
   for (const word of words) {
     if (!BANK_SET.has(word)) label(`word "${word}" not in bank`);
+    if (theme && THEME_WORD_SET[theme] && !THEME_WORD_SET[theme].has(word)) {
+      label(`word "${word}" doesn't belong to "${theme}", breaks the day's theme`);
+    }
     const path = paths[word];
     if (!path || path.length !== word.length) { label(`path length mismatch for "${word}"`); continue; }
 

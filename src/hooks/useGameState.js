@@ -213,7 +213,7 @@ export function useGameState() {
     const tier = getTierFromHints(hintsUsed);
     const stars = '⭐'.repeat(tier);
     const hintLine = hintsUsed === 0 ? 'No hints used' : `💡 ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'} used`;
-    return `Weave #${puzzleNumber} 🧶\n${puzzle.words.length} words in ${formatElapsed(elapsedSeconds)} • ${hintLine}\n${stars}`;
+    return `Weave #${puzzleNumber} 🧶 ${puzzle.theme}\n${puzzle.words.length} words in ${formatElapsed(elapsedSeconds)} • ${hintLine}\n${stars}`;
   }, [puzzle, gameStatus, hintsUsed, puzzleNumber, elapsedSeconds]);
 
   return {

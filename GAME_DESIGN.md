@@ -635,3 +635,83 @@ build` passes clean. Today (2026-10-07) falling out of the puzzle
 data means the app will show its "No puzzle today" empty state if
 visited today, by design, not a bug, exactly mirroring what a genuine
 reset should do.
+
+## Themes added, reversing the original "no theme" decision: 2026-10-17
+
+User asked for Weave's puzzles to have a theme. This directly reverses
+the original design decision in "Core mechanic" above (full-coverage
+word find, explicitly no category/spangram, chosen when the user picked
+"Strands but no categories" from the original 5 mechanic options). Asked
+the user how far to take it: full Strands mechanic (theme + spangram
+bonus word spanning two opposite edges, special highlight color) or
+theme only. User picked theme only, no spangram, keeping the rest of
+the mechanic (full coverage, no fail state, 3 hints, star rating)
+exactly as it already was.
+
+**Word bank restructured into 6 categories.** `src/data/wordBank.js`'s
+flat 323-word list got sorted into `THEMES`, a name -> word-list map:
+Fur, Feathers & Fins / Earth, Wind & Weather / Food, Glorious Food /
+Under One Roof / Dressed to the Nines / Gadgets & Getaways. Every one
+of the original 323 words got assigned to exactly one category
+(verified programmatically: 0 left unassigned, 0 duplicated across
+categories). Two categories (clothing, tools/vehicles) came out thin
+after sorting, especially at the longer lengths a 48-cell Sunday grid
+leans on, so 39 new fact-checked common words were added to pad them
+out to a comparable depth to the other four (final counts: Fur,
+Feathers & Fins 71, Earth, Wind & Weather 64, Food, Glorious Food 76,
+Under One Roof 50, Dressed to the Nines 43, Gadgets & Getaways 58;
+362 words total). `WORD_BANK` (the flat, all-categories-merged view)
+stays exported alongside `THEMES` since `verify-puzzles.mjs` and any
+future tooling that doesn't care about theme membership still wants a
+flat "is this a real bank word" set.
+
+**Caught before shipping, not after: the first pass at naming these 6
+categories collided with Sprout.** Sprout (the other NoodleGames
+sibling with a real category mechanic, `noodle_games`/sibling repo
+`sprout/src/data/puzzles.json`) already has 20 categories covering
+almost every common-word domain there is: Wild Animals, Birds, Bugs &
+Backyard Critters, Down on the Farm, Ocean & Sea Creatures, Kitchen &
+Cooking, Fruits & Vegetables, Sweets & Desserts, Clothing &
+Accessories, House & Furniture, Tools & Hardware, Cars/Trains/Planes,
+Weather & Sky, Camping & Nature, and more. Because Weave's bank is the
+same kind of everyday-word vocabulary, the first attempt at naming its
+6 broader buckets (Animal Kingdom, Wild Outdoors, Kitchen & Pantry,
+Home Sweet Home, Wardrobe & Accessories, Tools/Tech & Travel) landed
+on near-duplicates of several Sprout names before anything was
+generated or shipped. Renamed to the idiom/wordplay names above
+instead, which also fits a word game better than Sprout's plain
+descriptive "X & Y" style and keeps the two games' theme badges from
+reading as copy-pasted when they sit side by side on the hub.
+
+**Generator now picks one category per day.** `generate-puzzles.mjs`
+cycles through a shuffled order of all 6 themes (reshuffling once a
+cycle empties, and never letting the last theme of one shuffle repeat
+as the first of the next), and draws that day's ENTIRE word set from
+just that category instead of the old flat cross-category bank. The
+ambiguity-repair step's candidate pool (see "Ambiguity eliminated at
+generation time" above) is scoped to the same category too, so a
+repair swap can never pull in an off-theme word. If a category's pool
+can't fill a particular grid size, generation falls back through the
+other 5 themes for that date before giving up, so one under-provisioned
+category can't fail the whole run. In practice it never needed the
+fallback: regenerating all 96 puzzles from the new epoch (2026-10-08
+through 2027-01-11) produced an exactly even split (16 days per theme)
+with zero immediate repeats, zero ambiguous words, and
+`verify-puzzles.mjs` (now also checking every word in a puzzle actually
+belongs to that puzzle's stated theme), `check-ambiguity.mjs`, and
+`test-matching.mjs` all pass clean, same as every prior regeneration.
+
+**Puzzle data gained a `theme` field.** Each entry in `puzzles.json` is
+now `{ grid, words, paths, theme }`. `useGameState.js` needed no changes
+beyond that, since it already just passes `puzzle` straight through.
+
+**UI changes**: the in-game copy under the grid ("No theme connects
+them, just find them all") became "Today's theme: **{theme}**".
+`HowToPlay.jsx`, this repo's `README.md`, and the hub's
+`noodle_games/src/data/games.js` card description all had their
+"no theme" language corrected to match (all three explicitly described
+the old behavior, so all three would have been actively wrong left as
+they were). The share text (`generateShareText` in `useGameState.js`)
+now includes the theme name too, e.g. `Weave #12 🧶 Food, Glorious Food`.
+No spangram, no second highlight color, no new win-condition logic:
+purely a content/copy change layered onto the existing mechanic.

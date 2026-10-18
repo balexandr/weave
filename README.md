@@ -1,7 +1,8 @@
 # Weave: Daily Word Grid
 
 A daily word-find puzzle: trace every word hidden in the grid. Every
-letter belongs to exactly one word, no leftovers, no theme.
+letter belongs to exactly one word, no leftovers, and every word fits
+the day's theme.
 
 Part of the [NoodleGames](https://noodlegames.co) family.
 
@@ -14,8 +15,9 @@ word. Any direction, including diagonals.
 
 - Spell a real word from the puzzle and it locks in, those letters light
   up and stay found.
-- No theme connects the words, just find every one until the whole grid
-  is highlighted.
+- Every word that day shares a real theme (e.g. "Food, Glorious
+  Food"), shown at the bottom of the grid. Find every one until the
+  whole grid is highlighted.
 - Wrong guess costs nothing: the path just resets. No penalty, no fail
   state, take your time.
 - Stuck? Use a hint (3 available). Each one reveals the starting letter
@@ -51,15 +53,17 @@ React + Vite · CSS Modules · localStorage · GitHub Pages
 ## Puzzle generation
 
 `src/data/wordBank.js` holds a hand-curated bank of common English
-words (not a scraped dictionary, see `GAME_DESIGN.md` for why).
-`scripts/generate-puzzles.mjs` builds each day's grid offline: picks a
-word set that exactly fills the day's cell count, places each word as a
-self-avoiding path via backtracking, and repairs any word that turns
-out to have more than one valid spelling elsewhere on the grid by
-swapping in a different same-length word, so every word has exactly one
-findable route. `scripts/verify-puzzles.mjs` and
-`scripts/check-ambiguity.mjs` independently re-check the generated
-output rather than trusting the generator's own logic.
+words (not a scraped dictionary, see `GAME_DESIGN.md` for why), split
+into 6 themed categories. `scripts/generate-puzzles.mjs` builds each
+day's grid offline: picks one category for the day, picks a word set
+from just that category that exactly fills the day's cell count, places
+each word as a self-avoiding path via backtracking, and repairs any
+word that turns out to have more than one valid spelling elsewhere on
+the grid by swapping in a different same-length word from the same
+category, so every word has exactly one findable route.
+`scripts/verify-puzzles.mjs` and `scripts/check-ambiguity.mjs`
+independently re-check the generated output rather than trusting the
+generator's own logic.
 
 Full design history and every decision made along the way is in
 `GAME_DESIGN.md`.

@@ -8,7 +8,7 @@ export default function HowToPlay({ onClose }) {
         <h2 className={styles.title}>How to Play</h2>
         <p className={styles.intro}>
           Trace every word hidden in the grid. Every letter belongs to
-          exactly one word, no leftovers.
+          exactly one word, no leftovers, and every word fits the day's theme.
         </p>
 
         <div className={styles.steps}>
@@ -23,7 +23,7 @@ export default function HowToPlay({ onClose }) {
             <span className={styles.stepIcon}><IconCheckCircle /></span>
             <div>
               <p className={styles.stepTitle}>Spell a real word? It locks in</p>
-              <p className={styles.stepDesc}>Those letters light up and stay found. No theme connects the words, just find them all.</p>
+              <p className={styles.stepDesc}>Those letters light up and stay found. Every word that day shares a theme, shown at the bottom of the grid.</p>
             </div>
           </div>
           <div className={styles.step}>
