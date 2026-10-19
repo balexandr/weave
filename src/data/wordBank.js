@@ -6,142 +6,152 @@
 //
 // Themed 2026-10-17, at the user's request: Weave originally shipped
 // deliberately theme-less (see GAME_DESIGN.md's original "Generation"
-// section and the "no theme" copy this change replaces in App.jsx /
-// HowToPlay.jsx) and grabbed words from one flat pool by length alone.
-// Every one of the original 323 words got sorted into exactly one of
-// the 6 categories below (verified programmatically: 0 missing, 0
-// duplicates, 0 unaccounted for); the 39 new words are padding, fact-
-// checked common compounds/nouns added so the thinner categories
-// (clothing, tools/vehicles) still have enough length variety to
-// reliably tile every weekday's grid size on their own, same bar as the
-// rest of this bank. generate-puzzles.mjs now picks ONE category per
-// day and draws that day's whole word set from it, instead of the full
-// bank, so every word on a given day's grid shares a real theme.
+// section) and grabbed words from one flat pool by length alone.
+// Restructured, then audited and corrected the same day (the user
+// explicitly asked to verify every word actually fits its stated
+// theme, not just that the file was internally consistent): two
+// category NAMES overclaimed what their word pools actually covered
+// ("Fur, Feathers & Fins" promised mammals/birds/fish but the pool was
+// full of insects, amphibians, reptiles and mollusks with none of
+// those; "Gadgets & Getaways" included music/movie/story/instruments/
+// a stadium, none of which are a gadget or a trip). Renamed both to
+// honest, broader names (Creatures Great & Small, Gadgets & Getaways
+// kept but emptied of its non-gadget/non-travel words instead) rather
+// than just relabeling over a mismatch. Also dropped words that don't
+// honestly belong to ANY theme (web, feather - animal PRODUCTS, not
+// animals; leg - a body part, which also collides with Sprout's real
+// "Body Parts" category; music/movie/story/stadium/violin/guitar/
+// trumpet/metal - abstract or venue/instrument words with no clean
+// concrete-object fit), and relocated household/garage tools
+// (hammer, wrench, shovel, saw, nail, bolt, drill, ladder, scissors,
+// iron, paint, crayon, pencil, eraser) from Gadgets & Getaways into
+// Under One Roof, where they actually belong, plus map (navigation,
+// not household) into Gadgets & Getaways and gold (jewelry material)
+// into Dressed to the Nines.
 //
-// Category NAMES deliberately avoid Sprout's (noodle_games sibling,
-// src/data/puzzles.json): Sprout already owns 20 plain descriptive
-// category labels covering nearly every common-word domain there is
-// (Wild Animals, Kitchen & Cooking, Clothing & Accessories, House &
-// Furniture, Tools & Hardware, Weather & Sky, Camping & Nature, etc) -
-// since Weave's bank is built from the same kind of everyday-word
-// vocabulary, a first pass at naming these 6 broader buckets landed on
-// near-duplicates of several (caught before shipping, not after).
-// Renamed to idiom/wordplay-flavored names instead of Sprout's flat
-// "X & Y" descriptive style, which also reads better for a word game
-// and makes the two games' theme badges feel designed, not copied, when
-// they sit side by side on the hub.
+// Category NAMES also deliberately avoid Sprout's (noodle_games
+// sibling, src/data/puzzles.json): Sprout already owns 20 plain
+// descriptive category labels covering nearly every common-word
+// domain there is (Wild Animals, Kitchen & Cooking, Clothing &
+// Accessories, House & Furniture, Tools & Hardware, Weather & Sky,
+// Camping & Nature, Body Parts, etc) - since Weave's bank is built
+// from the same kind of everyday-word vocabulary, a first pass at
+// naming these 6 broader buckets landed on near-duplicates of several
+// (caught before shipping, not after). Named with idiom/wordplay
+// instead of Sprout's flat "X & Y" descriptive style, which also reads
+// better for a word game and keeps the two games' theme badges from
+// reading as copy-pasted when they sit side by side on the hub.
 //
 // THEMES below is the source of truth; WORD_BANK (flat, all categories
 // merged) stays exported for scripts/verify-puzzles.mjs's membership
 // check and any future tooling that just wants "is this a real bank
 // word" without caring which theme it belongs to.
 export const THEMES = {
-  'Fur, Feathers & Fins': [
+  'Creatures Great & Small': [
     // length 3
-    'cat', 'dog', 'fox', 'owl', 'bee', 'ant', 'pig', 'cow', 'bat', 'rat',
-    'web',
+    'ant', 'bat', 'bee', 'cat', 'cow', 'dog', 'fox', 'owl', 'pig', 'rat',
     // length 4
-    'frog', 'lion', 'wolf', 'bear', 'deer', 'swan', 'hawk', 'crow', 'moth', 'wasp',
-    'lamb', 'goat', 'mule', 'seal', 'fish', 'crab', 'clam', 'toad',
+    'bear', 'clam', 'crab', 'crow', 'deer', 'fish', 'frog', 'goat', 'hawk', 'lamb',
+    'lion', 'moth', 'mule', 'seal', 'swan', 'toad', 'wasp', 'wolf',
     // length 5
-    'tiger', 'zebra', 'camel', 'horse', 'mouse', 'otter', 'eagle', 'shark', 'whale', 'snake',
-    'goose',
+    'camel', 'eagle', 'goose', 'horse', 'mouse', 'otter', 'shark', 'snake', 'tiger', 'whale',
+    'zebra',
     // length 6
-    'rabbit', 'turtle', 'monkey', 'donkey', 'beetle', 'spider',
+    'beetle', 'donkey', 'monkey', 'rabbit', 'spider', 'turtle',
     // length 7
-    'cricket', 'feather', 'raccoon', 'penguin', 'octopus', 'dolphin', 'panther', 'leopard', 'giraffe', 'buffalo',
-    'sparrow', 'peacock', 'hamster',
+    'buffalo', 'cricket', 'dolphin', 'giraffe', 'hamster', 'leopard', 'octopus', 'panther', 'peacock', 'penguin',
+    'raccoon', 'sparrow',
     // length 8
-    'elephant', 'squirrel', 'dinosaur', 'flamingo', 'hedgehog', 'kangaroo',
+    'dinosaur', 'elephant', 'flamingo', 'hedgehog', 'kangaroo', 'squirrel',
     // length 9
-    'crocodile', 'butterfly', 'porcupine', 'alligator', 'chameleon', 'dragonfly',
+    'alligator', 'butterfly', 'chameleon', 'crocodile', 'dragonfly', 'porcupine',
   ],
-  'Earth, Wind & Weather': [
+  'The Great Outdoors': [
     // length 3
-    'sun', 'sky', 'ice', 'oak', 'sea', 'hay', 'log',
+    'hay', 'ice', 'log', 'oak', 'sea', 'sky', 'sun',
     // length 4
-    'reef', 'pond', 'lake', 'hill', 'rock', 'sand', 'dust', 'wind', 'rain', 'snow',
-    'star', 'moon', 'coal',
+    'coal', 'dust', 'hill', 'lake', 'moon', 'pond', 'rain', 'reef', 'rock', 'sand',
+    'snow', 'star', 'wind',
     // length 5
-    'beach', 'ocean', 'river', 'field', 'cloud', 'storm', 'stone',
+    'beach', 'cloud', 'field', 'ocean', 'river', 'stone', 'storm',
     // length 6
-    'garden', 'forest', 'valley', 'meadow', 'desert', 'island', 'bridge', 'castle', 'tunnel', 'cavern',
-    'branch', 'jungle', 'canyon', 'summit', 'harbor', 'gravel', 'pebble',
+    'branch', 'bridge', 'canyon', 'castle', 'cavern', 'desert', 'forest', 'garden', 'gravel', 'harbor',
+    'island', 'jungle', 'meadow', 'pebble', 'summit', 'tunnel', 'valley',
     // length 7
-    'volcano', 'glacier', 'blossom', 'thicket', 'boulder', 'thunder', 'tornado', 'rainbow', 'sunrise', 'pathway',
+    'blossom', 'boulder', 'glacier', 'pathway', 'rainbow', 'sunrise', 'thicket', 'thunder', 'tornado', 'volcano',
     // length 8
-    'blizzard', 'mountain', 'sunlight', 'seashell', 'woodland', 'hillside',
+    'blizzard', 'hillside', 'mountain', 'seashell', 'sunlight', 'woodland',
     // length 9
-    'moonlight', 'waterfall', 'driftwood', 'footprint',
-  ],
-  'Food, Glorious Food': [
-    // length 3
-    'egg', 'jam', 'pan', 'rib', 'fig', 'jar', 'cup', 'gum',
-    // length 4
-    'cake', 'soup', 'rice', 'bean', 'corn', 'peas', 'herb', 'sage', 'mint', 'lime',
-    'plum', 'pear', 'kiwi', 'salt',
-    // length 5
-    'candy', 'spoon', 'knife', 'plate', 'apple', 'grape', 'lemon', 'melon', 'onion', 'wheat',
-    'toast', 'bacon', 'juice', 'bread', 'sugar', 'honey', 'cream',
-    // length 6
-    'bottle', 'orange', 'banana', 'cherry', 'coffee', 'butter', 'cheese', 'cookie', 'noodle', 'salmon',
-    'turkey', 'walnut', 'peanut',
-    // length 7
-    'pumpkin', 'spinach', 'avocado', 'coconut', 'mustard', 'ketchup', 'vinegar', 'oatmeal', 'pancake', 'cabbage',
-    'popcorn',
-    // length 8
-    'sandwich', 'meatball', 'broccoli', 'zucchini', 'cucumber', 'doughnut',
-    // length 9
-    'chocolate', 'blueberry', 'raspberry', 'pineapple', 'cranberry', 'asparagus', 'artichoke',
+    'driftwood', 'footprint', 'moonlight', 'waterfall',
   ],
   'Under One Roof': [
     // length 3
-    'key', 'map', 'tap', 'wax', 'bed', 'box', 'ink', 'leg',
+    'bed', 'box', 'ink', 'key', 'saw', 'tap', 'wax',
     // length 4
-    'gate', 'lock', 'knob', 'door', 'wall', 'roof', 'lamp', 'gold',
+    'bolt', 'door', 'gate', 'iron', 'knob', 'lamp', 'lock', 'nail', 'roof', 'wall',
     // length 5
-    'brick', 'glass', 'paper', 'chair', 'table', 'couch', 'shelf', 'towel', 'brush', 'clock',
-    'novel', 'attic',
+    'attic', 'brick', 'brush', 'chair', 'clock', 'couch', 'drill', 'glass', 'novel', 'paint',
+    'paper', 'shelf', 'table', 'towel',
     // length 6
-    'candle', 'basket', 'pillow', 'window', 'mirror', 'closet', 'garage', 'cellar',
+    'basket', 'candle', 'cellar', 'closet', 'crayon', 'eraser', 'garage', 'hammer', 'ladder', 'mirror',
+    'pencil', 'pillow', 'shovel', 'window', 'wrench',
     // length 7
-    'blanket', 'ceiling', 'kitchen', 'chimney', 'balcony', 'hallway', 'library', 'cabinet', 'curtain', 'doorway',
+    'balcony', 'blanket', 'cabinet', 'ceiling', 'chimney', 'curtain', 'doorway', 'hallway', 'kitchen', 'library',
     // length 8
-    'mattress', 'notebook', 'calendar', 'envelope',
+    'calendar', 'envelope', 'mattress', 'notebook', 'scissors',
   ],
   'Dressed to the Nines': [
     // length 3
-    'zip', 'hat', 'bag',
+    'bag', 'hat', 'zip',
     // length 4
-    'cape', 'sock', 'belt', 'coat', 'vest', 'boot', 'ring', 'comb', 'robe', 'cuff',
+    'belt', 'boot', 'cape', 'coat', 'comb', 'cuff', 'gold', 'ring', 'robe', 'sock',
+    'vest',
     // length 5
-    'cloth', 'glove', 'scarf', 'shirt', 'skirt', 'dress', 'pants', 'watch', 'cloak', 'visor',
+    'cloak', 'cloth', 'dress', 'glove', 'pants', 'scarf', 'shirt', 'skirt', 'visor', 'watch',
     // length 6
-    'wallet', 'sandal', 'jacket', 'helmet', 'mitten', 'bonnet', 'blouse', 'collar', 'slacks',
+    'blouse', 'bonnet', 'collar', 'helmet', 'jacket', 'mitten', 'sandal', 'slacks', 'wallet',
     // length 7
-    'sweater', 'necktie', 'pajamas',
+    'necktie', 'pajamas', 'sweater',
     // length 8
-    'umbrella', 'backpack', 'necklace', 'trousers', 'cardigan', 'slippers',
+    'backpack', 'cardigan', 'necklace', 'slippers', 'trousers', 'umbrella',
     // length 9
     'nightgown', 'waistcoat',
   ],
   'Gadgets & Getaways': [
     // length 3
-    'net', 'van', 'fan', 'saw', 'jet',
+    'fan', 'jet', 'map', 'net', 'van',
     // length 4
-    'iron', 'nail', 'ship', 'cart', 'bolt', 'disc',
+    'cart', 'disc', 'ship',
     // length 5
-    'metal', 'wheel', 'radio', 'phone', 'music', 'movie', 'story', 'paint', 'drill', 'truck',
-    'plane', 'drone', 'robot', 'wagon',
+    'drone', 'phone', 'plane', 'radio', 'robot', 'truck', 'wagon', 'wheel',
     // length 6
-    'crayon', 'pencil', 'eraser', 'ladder', 'hammer', 'wrench', 'shovel', 'violin', 'guitar', 'engine',
-    'rocket', 'anchor', 'camera', 'tablet', 'pickup',
+    'anchor', 'camera', 'engine', 'pickup', 'rocket', 'tablet',
     // length 7
-    'trumpet', 'stadium', 'compass', 'lantern', 'bicycle', 'scooter', 'trailer', 'tractor', 'machine', 'printer',
+    'bicycle', 'compass', 'lantern', 'machine', 'printer', 'scooter', 'tractor', 'trailer',
     // length 8
-    'scissors', 'suitcase', 'keyboard', 'computer', 'airplane', 'elevator',
+    'airplane', 'computer', 'elevator', 'keyboard', 'suitcase',
     // length 9
-    'telephone', 'speedboat',
+    'speedboat', 'telephone',
+  ],
+  'Cooking Up a Storm': [
+    // length 3
+    'cup', 'egg', 'fig', 'gum', 'jam', 'jar', 'pan', 'rib',
+    // length 4
+    'bean', 'cake', 'corn', 'herb', 'kiwi', 'lime', 'mint', 'pear', 'peas', 'plum',
+    'rice', 'sage', 'salt', 'soup',
+    // length 5
+    'apple', 'bacon', 'bread', 'candy', 'cream', 'grape', 'honey', 'juice', 'knife', 'lemon',
+    'melon', 'onion', 'plate', 'spoon', 'sugar', 'toast', 'wheat',
+    // length 6
+    'banana', 'bottle', 'butter', 'cheese', 'cherry', 'coffee', 'cookie', 'noodle', 'orange', 'peanut',
+    'salmon', 'turkey', 'walnut',
+    // length 7
+    'avocado', 'cabbage', 'coconut', 'ketchup', 'mustard', 'oatmeal', 'pancake', 'popcorn', 'pumpkin', 'spinach',
+    'vinegar',
+    // length 8
+    'broccoli', 'cucumber', 'doughnut', 'meatball', 'sandwich', 'zucchini',
+    // length 9
+    'artichoke', 'asparagus', 'blueberry', 'chocolate', 'cranberry', 'pineapple', 'raspberry',
   ],
 };
 

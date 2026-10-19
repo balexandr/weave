@@ -650,20 +650,19 @@ exactly as it already was.
 
 **Word bank restructured into 6 categories.** `src/data/wordBank.js`'s
 flat 323-word list got sorted into `THEMES`, a name -> word-list map:
-Fur, Feathers & Fins / Earth, Wind & Weather / Food, Glorious Food /
-Under One Roof / Dressed to the Nines / Gadgets & Getaways. Every one
-of the original 323 words got assigned to exactly one category
-(verified programmatically: 0 left unassigned, 0 duplicated across
-categories). Two categories (clothing, tools/vehicles) came out thin
-after sorting, especially at the longer lengths a 48-cell Sunday grid
-leans on, so 39 new fact-checked common words were added to pad them
-out to a comparable depth to the other four (final counts: Fur,
-Feathers & Fins 71, Earth, Wind & Weather 64, Food, Glorious Food 76,
-Under One Roof 50, Dressed to the Nines 43, Gadgets & Getaways 58;
-362 words total). `WORD_BANK` (the flat, all-categories-merged view)
-stays exported alongside `THEMES` since `verify-puzzles.mjs` and any
-future tooling that doesn't care about theme membership still wants a
-flat "is this a real bank word" set.
+Animal Kingdom / Wild Outdoors / Kitchen & Pantry / Home Sweet Home /
+Wardrobe & Accessories / Tools, Tech & Travel (first-pass names, later
+renamed twice more - see the two corrections below). Every one of the
+original 323 words got assigned to exactly one category (verified
+programmatically: 0 left unassigned, 0 duplicated across categories).
+Two categories (clothing, tools/vehicles) came out thin after sorting,
+especially at the longer lengths a 48-cell Sunday grid leans on, so 39
+new fact-checked common words were added to pad them out to a
+comparable depth to the other four (362 words total at this point).
+`WORD_BANK` (the flat, all-categories-merged view) stays exported
+alongside `THEMES` since `verify-puzzles.mjs` and any future tooling
+that doesn't care about theme membership still wants a flat "is this a
+real bank word" set.
 
 **Caught before shipping, not after: the first pass at naming these 6
 categories collided with Sprout.** Sprout (the other NoodleGames
@@ -675,13 +674,50 @@ Cooking, Fruits & Vegetables, Sweets & Desserts, Clothing &
 Accessories, House & Furniture, Tools & Hardware, Cars/Trains/Planes,
 Weather & Sky, Camping & Nature, and more. Because Weave's bank is the
 same kind of everyday-word vocabulary, the first attempt at naming its
-6 broader buckets (Animal Kingdom, Wild Outdoors, Kitchen & Pantry,
-Home Sweet Home, Wardrobe & Accessories, Tools/Tech & Travel) landed
-on near-duplicates of several Sprout names before anything was
-generated or shipped. Renamed to the idiom/wordplay names above
-instead, which also fits a word game better than Sprout's plain
-descriptive "X & Y" style and keeps the two games' theme badges from
-reading as copy-pasted when they sit side by side on the hub.
+6 broader buckets landed on near-duplicates of several Sprout names
+before anything was generated or shipped. Renamed to Fur, Feathers &
+Fins / Earth, Wind & Weather / Food, Glorious Food / Under One Roof /
+Dressed to the Nines / Gadgets & Getaways instead, idiom/wordplay names
+that also fit a word game better than Sprout's plain descriptive
+"X & Y" style and keep the two games' theme badges from reading as
+copy-pasted when they sit side by side on the hub.
+
+**Second correction, same day: two of those names overclaimed what
+their own word pools actually covered.** The user asked specifically
+to verify every word genuinely fits its stated theme, not just that
+the file was internally consistent - a real, separate failure mode
+from the Sprout-collision one above, since a category can be uniquely
+named and still be WRONG about its own contents. "Fur, Feathers &
+Fins" promised mammals, birds, and fish, but roughly 30 of its words
+were insects, amphibians, reptiles, and mollusks with none of those
+three coverings (ant, spider, frog, crab, octopus, alligator,
+dinosaur, etc). "Gadgets & Getaways" included `music`, `movie`,
+`story`, `violin`, `guitar`, `trumpet`, and `stadium` - none of which
+are a gadget or a trip - plus `metal`, an abstract material rather
+than a concrete object. Fixed by renaming (not just relabeling over
+the mismatch): "Fur, Feathers & Fins" became "Creatures Great & Small"
+(genuinely covers any creature regardless of covering) and "Food,
+Glorious Food" became "Cooking Up a Storm" (the pool always included
+kitchen tools like `spoon`/`knife`/`plate`, not just food itself, so
+the old name was narrower than its own contents even before the audit
+flagged it). Also dropped 11 words that didn't honestly belong to ANY
+theme: `web` and `feather` (animal PRODUCTS, not animals), `leg` (a
+body part, which also collides with Sprout's real "Body Parts"
+category), and `music`/`movie`/`story`/`stadium`/`violin`/`guitar`/
+`trumpet`/`metal` (abstract or venue/instrument words with no clean
+concrete-object fit). Relocated 16 more to the theme they actually
+fit: `map` and `gold` out of Under One Roof (navigation and jewelry
+material, not household), and the household/garage tools that had
+been sitting in Gadgets & Getaways (`hammer`, `wrench`, `shovel`,
+`saw`, `nail`, `bolt`, `drill`, `ladder`, `scissors`, `iron`, `paint`,
+`crayon`, `pencil`, `eraser`) into Under One Roof, where they actually
+belong. Final bank: 351 words across the same 6 categories (Creatures
+Great & Small 69, The Great Outdoors 64, Cooking Up a Storm 76, Under
+One Roof 61, Dressed to the Nines 44, Gadgets & Getaways 37).
+Regenerated all 96 puzzles again: still an exactly even 16-per-theme
+split, zero ambiguous words, `verify-puzzles.mjs`'s per-word
+theme-membership check (added alongside the first rename, see below)
+passes clean, `npm run build` passes clean.
 
 **Generator now picks one category per day.** `generate-puzzles.mjs`
 cycles through a shuffled order of all 6 themes (reshuffling once a
@@ -706,12 +742,17 @@ now `{ grid, words, paths, theme }`. `useGameState.js` needed no changes
 beyond that, since it already just passes `puzzle` straight through.
 
 **UI changes**: the in-game copy under the grid ("No theme connects
-them, just find them all") became "Today's theme: **{theme}**".
-`HowToPlay.jsx`, this repo's `README.md`, and the hub's
-`noodle_games/src/data/games.js` card description all had their
-"no theme" language corrected to match (all three explicitly described
-the old behavior, so all three would have been actively wrong left as
-they were). The share text (`generateShareText` in `useGameState.js`)
-now includes the theme name too, e.g. `Weave #12 🧶 Food, Glorious Food`.
-No spangram, no second highlight color, no new win-condition logic:
-purely a content/copy change layered onto the existing mechanic.
+them, just find them all") first became a small "Today's theme:
+**{theme}**" line in that same spot, then moved to a dedicated badge
+at the TOP of the puzzle (above the timer/word-count bar) after the
+user asked for it to be more prominent - same visual pattern (eyebrow
+label + bold accent-colored name) Sprout already uses for its own
+category badge, for suite-wide consistency. `HowToPlay.jsx`, this
+repo's `README.md`, and the hub's `noodle_games/src/data/games.js`
+card description all had their "no theme" language corrected to match
+(all three explicitly described the old behavior, so all three would
+have been actively wrong left as they were). The share text
+(`generateShareText` in `useGameState.js`) now includes the theme name
+too, e.g. `Weave #12 🧶 Cooking Up a Storm`. No spangram, no second
+highlight color, no new win-condition logic: purely a content/copy
+change layered onto the existing mechanic.
