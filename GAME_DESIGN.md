@@ -800,3 +800,36 @@ theme, 96 doesn't divide evenly by 7), zero ambiguous words,
 `verify-puzzles.mjs`'s per-word theme-membership check passes clean.
 Today's puzzle is now `AXE, BOLT, CRAYON, PAINT, SHOVEL, WRENCH` under
 DIY & Doodles - a clean, honest set.
+
+## Fourth pass, same request: read through all 96 future puzzles
+
+User explicitly asked to check every remaining future puzzle for the
+same mistake, not just confirm today's fix was isolated. Printed every
+day's theme + word list and read all 96 by eye. The 7-category split
+held up everywhere - every combination the generator actually drew
+reads as a genuinely coherent set, because each word now honestly
+belongs to its category rather than being technically defensible.
+
+Found one more subtler case worth fixing preemptively: "castle",
+"bridge", and "harbor" (still in The Great Outdoors from the ORIGINAL
+sort, untouched by either correction above) are man-made structures
+that read oddly next to pure nature words like VOLCANO and BLIZZARD -
+a weaker version of the same error, not yet reported by a user but
+clearly the same shape. Dropped "castle" (no honest home in any of
+the 7 categories - not nature, not household, not a gadget/vehicle)
+and moved "bridge"/"harbor"/"tunnel" (same risk, never yet drawn in a
+puzzle but in the pool) into Gadgets & Getaways, which already
+explicitly covers travel (anchor, ship, speedboat, suitcase are
+already there) - unlike Outdoors, which never claimed "and also human
+structures." The Great Outdoors is down to 60 words, Gadgets &
+Getaways up to 40.
+
+Regenerated all 96 puzzles again (this changes today's puzzle too,
+to `GOLD, JACKET, PANTS, RING, TROUSERS, ZIP` under Dressed to the
+Nines, since generation isn't seeded - a fresh run draws different
+grids/themes for every day, not just the one word that changed).
+Read through the full new 96-day list again by eye: bridge/harbor/
+tunnel now sit naturally alongside vehicles (e.g. `BICYCLE, BRIDGE,
+DISC, HARBOR, JET, NET, PLANE, SCOOTER, TRACTOR`), and Outdoors reads
+as consistently pure nature. `verify-puzzles.mjs`, `check-ambiguity.mjs`,
+`test-matching.mjs` all pass clean, `npm run build` passes clean.

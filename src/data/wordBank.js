@@ -33,6 +33,18 @@
 //    an animal, outdoor/nature, or a tech/travel item - no similar
 //    "technically defensible but weird together" outliers found).
 //
+// 3. (2026-10-22, same pass) User asked to check every remaining
+//    future puzzle for the same mistake. Reading through all 96 found
+//    one more subtler case: "castle", "bridge", "harbor" are man-made
+//    structures that read oddly next to pure nature words like
+//    VOLCANO/BLIZZARD under "The Great Outdoors" - a weaker version of
+//    the same error, caught preemptively instead of waiting for a
+//    third user report. Dropped "castle" (no honest home in any of
+//    the 7 categories) and moved "bridge"/"harbor"/"tunnel" into
+//    Gadgets & Getaways, which already explicitly covers travel
+//    (anchor, ship, speedboat, suitcase), unlike Outdoors, which never
+//    claimed "and also human structures."
+//
 // Category NAMES deliberately avoid Sprout's (noodle_games sibling,
 // src/data/puzzles.json): Sprout already owns 20 plain descriptive
 // category labels covering nearly every common-word domain there is
@@ -79,8 +91,8 @@ export const THEMES = {
     // length 5
     'beach', 'cloud', 'field', 'ocean', 'river', 'stone', 'storm',
     // length 6
-    'branch', 'bridge', 'canyon', 'castle', 'cavern', 'desert', 'forest', 'garden', 'gravel', 'harbor',
-    'island', 'jungle', 'meadow', 'pebble', 'summit', 'tunnel', 'valley',
+    'branch', 'canyon', 'cavern', 'desert', 'forest', 'garden', 'gravel', 'island', 'jungle', 'meadow',
+    'pebble', 'summit', 'valley',
     // length 7
     'blossom', 'boulder', 'glacier', 'pathway', 'rainbow', 'sunrise', 'thicket', 'thunder', 'tornado', 'volcano',
     // length 8
@@ -148,7 +160,7 @@ export const THEMES = {
     // length 5
     'drone', 'phone', 'plane', 'radio', 'robot', 'truck', 'wagon', 'wheel',
     // length 6
-    'anchor', 'camera', 'engine', 'pickup', 'rocket', 'tablet',
+    'anchor', 'bridge', 'camera', 'engine', 'harbor', 'pickup', 'rocket', 'tablet', 'tunnel',
     // length 7
     'bicycle', 'compass', 'lantern', 'machine', 'printer', 'scooter', 'tractor', 'trailer',
     // length 8
