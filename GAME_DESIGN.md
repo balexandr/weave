@@ -756,3 +756,47 @@ have been actively wrong left as they were). The share text
 too, e.g. `Weave #12 🧶 Cooking Up a Storm`. No spangram, no second
 highlight color, no new win-condition logic: purely a content/copy
 change layered onto the existing mechanic.
+
+## Third correction: a 7th category split out of Under One Roof: 2026-10-22
+
+User flagged a live puzzle directly: "Under One Roof" with TAP,
+CRAYON, LADDER, SHELF, and said it read as weird. They were right, and
+it traces straight back to the SECOND correction above - fixing
+"Gadgets & Getaways" overclaiming meant moving its garage tools and
+craft supplies somewhere, and "Under One Roof" was the nearest
+plausible-looking bucket at the time. It was never actually checked
+against that specific name: a ladder, a drill, a crayon are not
+things anyone would call part of "the house," no matter how loosely
+the category is read. Caught by the user's own eyes on a real puzzle,
+not by the earlier re-audit, which checked for overclaiming NAMES but
+didn't re-examine every individual word a second time.
+
+Moved 12 words back out of Under One Roof - `saw`, `bolt`, `nail`,
+`drill`, `hammer`, `ladder`, `wrench`, `shovel` (hardware/garage
+tools) and `crayon`, `pencil`, `eraser`, `paint` (craft/school
+supplies) - into a new 7th category, "DIY & Doodles." Those 12 alone
+were too thin and too skewed toward length 6 to reliably tile every
+weekday's grid size, so padded with 25 more fact-checked tool/craft
+words across the other lengths (`axe`, `vise`, `file`, `wire`, `rope`,
+`tape`, `pipe`, `level`, `clamp`, `pliers`, `chisel`, `funnel`,
+`marker`, `bucket`, `toolbox`, `stapler`, `hardware`, `sticker`,
+`glitter`, `palette`, `sandpaper`, `scrapbook`, `sketchpad`,
+`sawhorse`, `toolshed`) - 37 words total, same depth as Gadgets &
+Getaways. "DIY & Doodles" avoids Sprout's literal "Tools & Hardware"
+and "School & Office" names the same way every other rename in this
+file does.
+
+Re-audited the other 5 untouched categories word-by-word the same
+pass (not just a name-level check this time) looking for any other
+"technically defensible but weird together" outlier - found none.
+Under One Roof is now 49 words, genuine furniture/fixtures/rooms
+only. `generate-puzzles.mjs` needed zero code changes - it already
+reads `THEME_NAMES` dynamically, so going from 6 to 7 categories was
+pure data. Regenerated all 96 puzzles (including today's, which is
+what the user was actually looking at - deliberately not held back,
+since leaving a flagged-as-wrong puzzle live while only fixing the
+future would have missed the point): even split (13-14 days per
+theme, 96 doesn't divide evenly by 7), zero ambiguous words,
+`verify-puzzles.mjs`'s per-word theme-membership check passes clean.
+Today's puzzle is now `AXE, BOLT, CRAYON, PAINT, SHOVEL, WRENCH` under
+DIY & Doodles - a clean, honest set.

@@ -7,40 +7,44 @@
 // Themed 2026-10-17, at the user's request: Weave originally shipped
 // deliberately theme-less (see GAME_DESIGN.md's original "Generation"
 // section) and grabbed words from one flat pool by length alone.
-// Restructured, then audited and corrected the same day (the user
-// explicitly asked to verify every word actually fits its stated
-// theme, not just that the file was internally consistent): two
-// category NAMES overclaimed what their word pools actually covered
-// ("Fur, Feathers & Fins" promised mammals/birds/fish but the pool was
-// full of insects, amphibians, reptiles and mollusks with none of
-// those; "Gadgets & Getaways" included music/movie/story/instruments/
-// a stadium, none of which are a gadget or a trip). Renamed both to
-// honest, broader names (Creatures Great & Small, Gadgets & Getaways
-// kept but emptied of its non-gadget/non-travel words instead) rather
-// than just relabeling over a mismatch. Also dropped words that don't
-// honestly belong to ANY theme (web, feather - animal PRODUCTS, not
-// animals; leg - a body part, which also collides with Sprout's real
-// "Body Parts" category; music/movie/story/stadium/violin/guitar/
-// trumpet/metal - abstract or venue/instrument words with no clean
-// concrete-object fit), and relocated household/garage tools
-// (hammer, wrench, shovel, saw, nail, bolt, drill, ladder, scissors,
-// iron, paint, crayon, pencil, eraser) from Gadgets & Getaways into
-// Under One Roof, where they actually belong, plus map (navigation,
-// not household) into Gadgets & Getaways and gold (jewelry material)
-// into Dressed to the Nines.
+// Restructured into 6 categories, then corrected twice since:
 //
-// Category NAMES also deliberately avoid Sprout's (noodle_games
-// sibling, src/data/puzzles.json): Sprout already owns 20 plain
-// descriptive category labels covering nearly every common-word
-// domain there is (Wild Animals, Kitchen & Cooking, Clothing &
-// Accessories, House & Furniture, Tools & Hardware, Weather & Sky,
-// Camping & Nature, Body Parts, etc) - since Weave's bank is built
-// from the same kind of everyday-word vocabulary, a first pass at
-// naming these 6 broader buckets landed on near-duplicates of several
-// (caught before shipping, not after). Named with idiom/wordplay
-// instead of Sprout's flat "X & Y" descriptive style, which also reads
-// better for a word game and keeps the two games' theme badges from
-// reading as copy-pasted when they sit side by side on the hub.
+// 1. (same day) Two category NAMES overclaimed what their own word
+//    pools actually covered ("Fur, Feathers & Fins" promised mammals/
+//    birds/fish but the pool was full of insects/amphibians/reptiles
+//    with none of those; the food category's old name didn't cover
+//    its own kitchen tools). Renamed both rather than relabeling over
+//    the mismatch.
+//
+// 2. (2026-10-22) The user flagged a live puzzle - "Under One Roof"
+//    with TAP, CRAYON, LADDER, SHELF - as an incoherent set. A
+//    rigorous word-by-word recheck found the earlier correction pass
+//    had stuffed garage tools (hammer, wrench, drill, ladder, saw,
+//    nail, bolt, shovel) and school/craft supplies (crayon, pencil,
+//    eraser, paint) into "Under One Roof" to fix THAT pass's naming
+//    problem, without checking whether a ladder or a crayon is
+//    honestly a household object. It isn't. Split those 12 words
+//    into a new 7th category, "DIY & Doodles" (padded with 25 more
+//    fact-checked tool/craft words - the 12 alone were too thin and
+//    too skewed toward length 6 to reliably tile every grid size),
+//    leaving "Under One Roof" as genuine furniture/fixtures/rooms
+//    only. The other 5 categories were re-audited the same pass and
+//    held up fine (every word in them is honestly food, clothing,
+//    an animal, outdoor/nature, or a tech/travel item - no similar
+//    "technically defensible but weird together" outliers found).
+//
+// Category NAMES deliberately avoid Sprout's (noodle_games sibling,
+// src/data/puzzles.json): Sprout already owns 20 plain descriptive
+// category labels covering nearly every common-word domain there is
+// (Wild Animals, Kitchen & Cooking, Clothing & Accessories, House &
+// Furniture, Tools & Hardware, Weather & Sky, Camping & Nature, Body
+// Parts, School & Office, etc) - since Weave's bank is the same kind
+// of everyday-word vocabulary, naming these broader buckets has twice
+// landed on near-duplicates of Sprout names before shipping (caught
+// both times). Named with idiom/wordplay instead of Sprout's flat
+// "X & Y" descriptive style, which also reads better for a word game
+// and keeps the two games' theme badges from reading as copy-pasted
+// when they sit side by side on the hub.
 //
 // THEMES below is the source of truth; WORD_BANK (flat, all categories
 // merged) stays exported for scripts/verify-puzzles.mjs's membership
@@ -84,17 +88,36 @@ export const THEMES = {
     // length 9
     'driftwood', 'footprint', 'moonlight', 'waterfall',
   ],
+  'Cooking Up a Storm': [
+    // length 3
+    'cup', 'egg', 'fig', 'gum', 'jam', 'jar', 'pan', 'rib',
+    // length 4
+    'bean', 'cake', 'corn', 'herb', 'kiwi', 'lime', 'mint', 'pear', 'peas', 'plum',
+    'rice', 'sage', 'salt', 'soup',
+    // length 5
+    'apple', 'bacon', 'bread', 'candy', 'cream', 'grape', 'honey', 'juice', 'knife', 'lemon',
+    'melon', 'onion', 'plate', 'spoon', 'sugar', 'toast', 'wheat',
+    // length 6
+    'banana', 'bottle', 'butter', 'cheese', 'cherry', 'coffee', 'cookie', 'noodle', 'orange', 'peanut',
+    'salmon', 'turkey', 'walnut',
+    // length 7
+    'avocado', 'cabbage', 'coconut', 'ketchup', 'mustard', 'oatmeal', 'pancake', 'popcorn', 'pumpkin', 'spinach',
+    'vinegar',
+    // length 8
+    'broccoli', 'cucumber', 'doughnut', 'meatball', 'sandwich', 'zucchini',
+    // length 9
+    'artichoke', 'asparagus', 'blueberry', 'chocolate', 'cranberry', 'pineapple', 'raspberry',
+  ],
   'Under One Roof': [
     // length 3
-    'bed', 'box', 'ink', 'key', 'saw', 'tap', 'wax',
+    'bed', 'box', 'ink', 'key', 'tap', 'wax',
     // length 4
-    'bolt', 'door', 'gate', 'iron', 'knob', 'lamp', 'lock', 'nail', 'roof', 'wall',
+    'door', 'gate', 'iron', 'knob', 'lamp', 'lock', 'roof', 'wall',
     // length 5
-    'attic', 'brick', 'brush', 'chair', 'clock', 'couch', 'drill', 'glass', 'novel', 'paint',
-    'paper', 'shelf', 'table', 'towel',
+    'attic', 'brick', 'brush', 'chair', 'clock', 'couch', 'glass', 'novel', 'paper', 'shelf',
+    'table', 'towel',
     // length 6
-    'basket', 'candle', 'cellar', 'closet', 'crayon', 'eraser', 'garage', 'hammer', 'ladder', 'mirror',
-    'pencil', 'pillow', 'shovel', 'window', 'wrench',
+    'basket', 'candle', 'cellar', 'closet', 'garage', 'mirror', 'pillow', 'window',
     // length 7
     'balcony', 'blanket', 'cabinet', 'ceiling', 'chimney', 'curtain', 'doorway', 'hallway', 'kitchen', 'library',
     // length 8
@@ -133,25 +156,22 @@ export const THEMES = {
     // length 9
     'speedboat', 'telephone',
   ],
-  'Cooking Up a Storm': [
+  'DIY & Doodles': [
     // length 3
-    'cup', 'egg', 'fig', 'gum', 'jam', 'jar', 'pan', 'rib',
+    'axe', 'saw',
     // length 4
-    'bean', 'cake', 'corn', 'herb', 'kiwi', 'lime', 'mint', 'pear', 'peas', 'plum',
-    'rice', 'sage', 'salt', 'soup',
+    'bolt', 'file', 'nail', 'pipe', 'rope', 'tape', 'vise', 'wire',
     // length 5
-    'apple', 'bacon', 'bread', 'candy', 'cream', 'grape', 'honey', 'juice', 'knife', 'lemon',
-    'melon', 'onion', 'plate', 'spoon', 'sugar', 'toast', 'wheat',
+    'clamp', 'drill', 'level', 'paint',
     // length 6
-    'banana', 'bottle', 'butter', 'cheese', 'cherry', 'coffee', 'cookie', 'noodle', 'orange', 'peanut',
-    'salmon', 'turkey', 'walnut',
+    'bucket', 'chisel', 'crayon', 'eraser', 'funnel', 'hammer', 'ladder', 'marker', 'pencil', 'pliers',
+    'shovel', 'wrench',
     // length 7
-    'avocado', 'cabbage', 'coconut', 'ketchup', 'mustard', 'oatmeal', 'pancake', 'popcorn', 'pumpkin', 'spinach',
-    'vinegar',
+    'glitter', 'palette', 'stapler', 'sticker', 'toolbox',
     // length 8
-    'broccoli', 'cucumber', 'doughnut', 'meatball', 'sandwich', 'zucchini',
+    'hardware', 'sawhorse', 'toolshed',
     // length 9
-    'artichoke', 'asparagus', 'blueberry', 'chocolate', 'cranberry', 'pineapple', 'raspberry',
+    'sandpaper', 'scrapbook', 'sketchpad',
   ],
 };
 
