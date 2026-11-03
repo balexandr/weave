@@ -45,6 +45,26 @@
 //    (anchor, ship, speedboat, suitcase), unlike Outdoors, which never
 //    claimed "and also human structures."
 //
+// 4. (2026-11-03) User asked for a general "do these words actually
+//    fit their category" pass. Found the same error class again, not
+//    yet caught: "novel", "notebook", "calendar", "envelope",
+//    "scissors" were sitting in Under One Roof (furniture/fixtures/
+//    rooms) but are honestly desk/stationery items - the exact same
+//    mistake as the crayon/pencil/ladder one in #2, just missed that
+//    round. Moved "notebook"/"calendar"/"envelope"/"scissors" into
+//    DIY & Doodles (already a stationery/craft home: marker, stapler,
+//    sticker, scrapbook, sketchpad); dropped "novel" outright, since
+//    a novel isn't a tool or craft item either - no honest category
+//    for it, same call as "castle" in #3. "gold" (a material, not a
+//    worn item) and "net" (neither a gadget nor a travel item) got
+//    dropped the same way. "comb" moved from Dressed to the Nines to
+//    Under One Roof - it's a grooming tool, not clothing, and the
+//    bank already treats bathroom-adjacent items as household (towel,
+//    brush are already here). Backfilled Under One Roof's length-8/9
+//    gap left by the moves with more genuine furniture/room words
+//    (bedroom, bathroom, basement, cupboard, bookcase, doorbell,
+//    fireplace, staircase) rather than just shrinking the category.
+//
 // Category NAMES deliberately avoid Sprout's (noodle_games sibling,
 // src/data/puzzles.json): Sprout already owns 20 plain descriptive
 // category labels covering nearly every common-word domain there is
@@ -124,22 +144,25 @@ export const THEMES = {
     // length 3
     'bed', 'box', 'ink', 'key', 'tap', 'wax',
     // length 4
-    'door', 'gate', 'iron', 'knob', 'lamp', 'lock', 'roof', 'wall',
+    'comb', 'door', 'gate', 'iron', 'knob', 'lamp', 'lock', 'roof', 'wall',
     // length 5
-    'attic', 'brick', 'brush', 'chair', 'clock', 'couch', 'glass', 'novel', 'paper', 'shelf',
+    'attic', 'brick', 'brush', 'chair', 'clock', 'couch', 'glass', 'paper', 'shelf',
     'table', 'towel',
     // length 6
     'basket', 'candle', 'cellar', 'closet', 'garage', 'mirror', 'pillow', 'window',
     // length 7
-    'balcony', 'blanket', 'cabinet', 'ceiling', 'chimney', 'curtain', 'doorway', 'hallway', 'kitchen', 'library',
+    'balcony', 'bedroom', 'blanket', 'cabinet', 'ceiling', 'chimney', 'curtain', 'doorway', 'hallway', 'kitchen',
+    'library',
     // length 8
-    'calendar', 'envelope', 'mattress', 'notebook', 'scissors',
+    'basement', 'bathroom', 'bookcase', 'cupboard', 'doorbell', 'mattress',
+    // length 9
+    'fireplace', 'staircase',
   ],
   'Dressed to the Nines': [
     // length 3
     'bag', 'hat', 'zip',
     // length 4
-    'belt', 'boot', 'cape', 'coat', 'comb', 'cuff', 'gold', 'ring', 'robe', 'sock',
+    'belt', 'boot', 'cape', 'coat', 'cuff', 'ring', 'robe', 'sock',
     'vest',
     // length 5
     'cloak', 'cloth', 'dress', 'glove', 'pants', 'scarf', 'shirt', 'skirt', 'visor', 'watch',
@@ -154,7 +177,7 @@ export const THEMES = {
   ],
   'Gadgets & Getaways': [
     // length 3
-    'fan', 'jet', 'map', 'net', 'van',
+    'fan', 'jet', 'map', 'van',
     // length 4
     'cart', 'disc', 'ship',
     // length 5
@@ -181,7 +204,7 @@ export const THEMES = {
     // length 7
     'glitter', 'palette', 'stapler', 'sticker', 'toolbox',
     // length 8
-    'hardware', 'sawhorse', 'toolshed',
+    'calendar', 'envelope', 'hardware', 'notebook', 'sawhorse', 'scissors', 'toolshed',
     // length 9
     'sandpaper', 'scrapbook', 'sketchpad',
   ],
