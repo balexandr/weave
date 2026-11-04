@@ -255,6 +255,41 @@
   display: block;
 }
 
+/* Deliberately filled/warmer than the outlined hintButton - a bigger
+   assist (reveals a whole word) should visually read as a bigger ask,
+   not an equally-casual tap. Icon-only (not a text pill like Hint) to
+   keep the statusBar row from overflowing on narrow phones. */
+.completeButton {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .completeButton:not(:disabled):hover {
+    background: var(--accent);
+    color: var(--surface);
+    transform: translateY(-1px);
+  }
+}
+
+.completeButton:not(:disabled):active {
+  transform: scale(0.9);
+}
+
+.completeButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 /* ── Current attempt display ───────────────────── */
 .attemptBox {
   display: flex;

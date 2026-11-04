@@ -13,7 +13,7 @@ import { recordTodayShare, getCompletedTodayCount, buildShareAllText, TOTAL_GAME
 import { getTierFromHints, formatElapsed } from './utils/scoring';
 import { toLeaderboardScore } from './utils/leaderboardScore';
 import { fetchTodayBoard, findMyRow, wouldQualify } from './utils/leaderboard';
-import { IconBulb, IconCheckmark, IconShare, IconWeaveMark, IconLeaderboard } from './components/Icons';
+import { IconBulb, IconWand, IconCheckmark, IconShare, IconWeaveMark, IconLeaderboard } from './components/Icons';
 
 const HOW_TO_PLAY_KEY = 'weave-how-to-play-seen';
 
@@ -37,6 +37,7 @@ export default function App() {
     submitPath,
     checkTap,
     useHint,
+    completeWord,
     generateShareText,
   } = useGameState();
 
@@ -167,7 +168,10 @@ export default function App() {
     );
   }
 
-  const hintsLeft = maxHints - hintsUsed;
+  // Clamped at 0: completeWord can push hintsUsed past maxHints (see
+  // COMPLETE_WORD_COST in useGameState), and this is a display/gating
+  // value, not the real cost tally, so it should never read negative.
+  const hintsLeft = Math.max(0, maxHints - hintsUsed);
 
   return (
     <div className={styles.container}>
@@ -215,6 +219,16 @@ export default function App() {
             aria-label="Use a hint"
           >
             <IconBulb size={15} /> Hint ({hintsLeft})
+          </button>
+          <button
+            type="button"
+            className={styles.completeButton}
+            onClick={completeWord}
+            disabled={gameStatus !== 'playing' || foundWords.size === puzzle.words.length}
+            aria-label="Complete a word for me, costs more than a hint"
+            title="Reveals one whole word instantly. Costs more than a hint."
+          >
+            <IconWand size={16} />
           </button>
         </div>
 

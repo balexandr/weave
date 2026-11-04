@@ -6,6 +6,15 @@ import { matchWord } from '../utils/matchWord';
 const STORAGE_KEY = 'weave-game-state';
 const EPOCH = '2026-10-08';
 const MAX_HINTS = 3;
+// Completing a whole word is a much bigger assist than one letter-reveal,
+// so it costs more than the entire hint budget combined (MAX_HINTS) -
+// otherwise a stuck player could grind out the whole puzzle via this
+// button while still showing as "better than 3 hints" on the leaderboard,
+// which is the one number (hintsUsed) that drives both the star tier and
+// the leaderboard score (see toLeaderboardScore). Deliberately reuses
+// that same counter instead of adding a parallel one, so this can't
+// become a free way to keep a clean-looking score.
+const COMPLETE_WORD_COST = 5;
 
 function getTodayKey() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
@@ -185,28 +194,43 @@ export function useGameState() {
     if (word) applyFound(word, path);
   }, [puzzle, gameStatus, foundWords, foundCells, applyFound]);
 
-  const useHint = useCallback(() => {
-    if (!puzzle || gameStatus !== 'playing' || hintsUsed >= MAX_HINTS) return;
-
-    // Keep revealing the word already in progress, as long as it's
-    // still unfound and hasn't been fully spelled out already. Only
-    // start a new word once that one's done (found, or every letter
-    // already revealed).
+  // Shared by useHint and completeWord: which word gets the help. Keeps
+  // revealing the word already in progress, as long as it's still
+  // unfound and hasn't been fully spelled out already, so hints/reveals
+  // concentrate on one word instead of spreading thin. Only starts a new
+  // (alphabetically first) remaining word once that one's done.
+  const pickHintTarget = useCallback(() => {
     const activeStillGoing = activeHintWord
       && !foundWords.has(activeHintWord)
       && (hintProgress[activeHintWord] || 0) < activeHintWord.length;
+    if (activeStillGoing) return activeHintWord;
+    const remaining = puzzle.words.filter((w) => !foundWords.has(w));
+    if (remaining.length === 0) return null;
+    return [...remaining].sort()[0];
+  }, [puzzle, foundWords, activeHintWord, hintProgress]);
 
-    let target = activeStillGoing ? activeHintWord : null;
-    if (!target) {
-      const remaining = puzzle.words.filter((w) => !foundWords.has(w));
-      if (remaining.length === 0) return;
-      target = [...remaining].sort()[0];
-      setActiveHintWord(target);
-    }
-
+  const useHint = useCallback(() => {
+    if (!puzzle || gameStatus !== 'playing' || hintsUsed >= MAX_HINTS) return;
+    const target = pickHintTarget();
+    if (!target) return;
+    setActiveHintWord(target);
     setHintProgress((prev) => ({ ...prev, [target]: (prev[target] || 0) + 1 }));
     setHintsUsed((n) => n + 1);
-  }, [puzzle, gameStatus, hintsUsed, foundWords, activeHintWord, hintProgress]);
+  }, [puzzle, gameStatus, hintsUsed, pickHintTarget]);
+
+  // Last-resort "unstick me" button: fully reveals one word instantly
+  // instead of one letter at a time. Always available during play (not
+  // gated behind the hint budget running out) - the whole point is to
+  // keep a stuck player moving rather than leaving them staring at a
+  // grid with hints already spent. See COMPLETE_WORD_COST above for why
+  // it's not free.
+  const completeWord = useCallback(() => {
+    if (!puzzle || gameStatus !== 'playing') return;
+    const target = pickHintTarget();
+    if (!target) return;
+    setHintsUsed((n) => n + COMPLETE_WORD_COST);
+    applyFound(target, puzzle.paths[target]);
+  }, [puzzle, gameStatus, pickHintTarget, applyFound]);
 
   const generateShareText = useCallback(() => {
     if (!puzzle || gameStatus !== 'won') return '';
@@ -235,6 +259,7 @@ export function useGameState() {
     submitPath,
     checkTap,
     useHint,
+    completeWord,
     generateShareText,
   };
 }

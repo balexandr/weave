@@ -45,6 +45,16 @@ export function IconBulb({ size = 20, ...props }) {
   );
 }
 
+export function IconWand({ size = 20, ...props }) {
+  return (
+    <svg width={size} height={size} {...base(props)}>
+      <path d="M5 19L15.5 8.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M17 3.3l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8.8-1.9Z" fill="currentColor" />
+      <path d="M20.2 9.4l.5 1.1 1.1.5-1.1.5-.5 1.1-.5-1.1-1.1-.5 1.1-.5.5-1.1Z" fill="currentColor" opacity="0.75" />
+    </svg>
+  );
+}
+
 export function IconTrophy({ size = 44, ...props }) {
   return (
     <svg width={size} height={size} {...base(props)}>

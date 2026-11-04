@@ -1,4 +1,4 @@
-import { IconDrag, IconCheckCircle, IconXCircle, IconBulb } from './Icons';
+import { IconDrag, IconCheckCircle, IconXCircle, IconBulb, IconWand } from './Icons';
 import styles from './HowToPlay.module.css';
 
 export default function HowToPlay({ onClose }) {
@@ -38,6 +38,13 @@ export default function HowToPlay({ onClose }) {
             <div>
               <p className={styles.stepTitle}>Stuck? Use a hint</p>
               <p className={styles.stepDesc}>3 hints available. The first reveals a word's starting letter; each one after that reveals the next letter of that same word. Fewer hints used, more stars.</p>
+            </div>
+          </div>
+          <div className={styles.step}>
+            <span className={styles.stepIcon}><IconWand /></span>
+            <div>
+              <p className={styles.stepTitle}>Really stuck? Complete a word</p>
+              <p className={styles.stepDesc}>The wand button next to Hint reveals one whole word instantly, no limit on uses. It costs a lot more than a hint, so save it for when you're truly stuck rather than hints running out.</p>
             </div>
           </div>
         </div>
